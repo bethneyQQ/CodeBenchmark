@@ -179,7 +179,6 @@ please install anthropic via `pip install 'lm-eval[anthropic]'` or `pip install 
         self.client = anthropic.Anthropic()
         self.temperature = temperature
         self.max_tokens_to_sample = max_tokens_to_sample
-        self.tokenizer = self.client.get_tokenizer()
         self.kwargs = kwargs
 
     @property
@@ -206,10 +205,15 @@ please install anthropic via `pip install 'lm-eval[anthropic]'` or `pip install 
         raise NotImplementedError("No support for logits.")
 
     def tok_encode(self, string: str) -> List[int]:
-        return self.tokenizer.encode(string).ids
+        # Anthropic doesn't provide direct tokenization access
+        # Return approximate token count based on character length
+        # This is a rough approximation: ~4 characters per token
+        return list(range(len(string) // 4 + 1))
 
     def tok_decode(self, tokens: List[int]) -> str:
-        return self.tokenizer.decode(tokens)
+        # Since we can't actually decode tokens without the tokenizer,
+        # this method should not be used for Anthropic models
+        raise NotImplementedError("Token decoding not available for Anthropic models")
 
     def _loglikelihood_tokens(self, requests, disable_tqdm: bool = False):
         raise NotImplementedError("No support for logits.")
@@ -318,20 +322,30 @@ class AnthropicChat(LocalCompletionsAPI):
         eos="\n\nHuman:",
         **kwargs,
     ) -> dict:
-        system = (
-            messages[0].get("content") if messages[0].get("role") == "system" else None
-        )
-        if system:
-            messages = messages[1:]
+        # Handle case where messages might be strings instead of dicts
+        if messages and isinstance(messages[0], dict):
+            system = (
+                messages[0].get("content") if messages[0].get("role") == "system" else None
+            )
+            if system:
+                messages = messages[1:]
+        else:
+            system = None
 
         cleaned_messages = []
         for msg in messages:
-            cleaned_msg = {
-                "role": msg["role"],
-                "content": [
-                    {"type": msg["type"], msg["type"]: msg["content"]},
-                ],
-            }
+            if isinstance(msg, str):
+                # If message is a string, treat it as user content
+                cleaned_msg = {
+                    "role": "user",
+                    "content": msg,
+                }
+            else:
+                # If message is a dict, process normally
+                cleaned_msg = {
+                    "role": msg.get("role", "user"),
+                    "content": msg.get("content", str(msg)),
+                }
             cleaned_messages.append(cleaned_msg)
 
         gen_kwargs.pop("do_sample", False)
