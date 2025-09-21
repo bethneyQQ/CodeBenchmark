@@ -1,0 +1,13 @@
+{
+  "model": "claude-3-haiku-20240307",
+  "debug": false,
+  "allowed_tools": [
+    "Bash",
+    "Python",
+    "FileEditor"
+  ],
+  "cwd": "./output",
+  "max_problems": 5,
+  "timeout_per_phase": 300,
+  "cleanup_between_runs": true
+}

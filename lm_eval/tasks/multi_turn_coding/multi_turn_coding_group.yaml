@@ -1,0 +1,27 @@
+group: multi_turn_coding_suite
+task:
+  - multi_turn_coding_eval_claude_code
+
+aggregate_metric_list:
+  - metric: file_existence_check
+    aggregation: mean
+    higher_is_better: true
+  - metric: prd_quality_from_file  
+    aggregation: mean
+    higher_is_better: true
+  - metric: design_coherence_from_file
+    aggregation: mean
+    higher_is_better: true
+  - metric: code_execution_test
+    aggregation: mean
+    higher_is_better: true
+  - metric: project_structure_validation
+    aggregation: mean
+    higher_is_better: true
+  - metric: integration_test
+    aggregation: mean
+    higher_is_better: true
+
+metadata:
+  version: 1.0
+  description: "Multi-turn coding evaluation suite with Claude Code SDK"

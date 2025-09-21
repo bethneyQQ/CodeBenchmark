@@ -1,0 +1,452 @@
+[
+  {
+    "problem_id": "easy_001",
+    "complexity": "easy",
+    "domain": "web_app",
+    "problem_description": "Create a basic 'Hello World' web page that displays a greeting message and the current date",
+    "prd_context": "Target audience: Complete beginners learning HTML. Must work on IE11+ and mobile devices. Page load time <2s. Support screen readers for accessibility. Include favicon and proper meta tags for SEO.",
+    "design_context": "Responsive design using CSS Grid/Flexbox. Color contrast ratio 4.5:1 minimum. Typography: system fonts only. No external dependencies. Progressive enhancement approach. Support offline viewing.",
+    "code_context": "Vanilla HTML5/CSS3 only. Use semantic elements (header, main, time). Implement CSS custom properties for theming. Include structured data markup. Minify CSS for production. Use BEM naming convention.",
+    "quality_context": "W3C validation required. Lighthouse score >90. WCAG 2.1 AA compliance. Cross-browser testing on Chrome, Firefox, Safari. Performance budget: <50KB total. Include automated testing setup."
+  },
+  {
+    "problem_id": "easy_002",
+    "complexity": "easy",
+    "domain": "data_processing",
+    "problem_description": "Write a Python script that reads a text file and counts the number of words, lines, and characters",
+    "prd_context": "CLI tool for writers and editors. Must handle files up to 100MB. Support UTF-8, UTF-16, ASCII encodings. Provide statistics in JSON/CSV formats. Include word frequency analysis. Support batch processing of multiple files.",
+    "design_context": "Memory-efficient streaming for large files. Configurable via command-line arguments and config file. Plugin architecture for custom analyzers. Progress bar for large files. Caching for repeated analysis.",
+    "code_context": "Python 3.8+ with type hints. Use argparse for CLI. Implement generator patterns for memory efficiency. Include comprehensive logging. Follow PEP 8 and use black formatter. Include performance profiling.",
+    "quality_context": "Handle 100MB files in <2GB RAM. Unit test coverage >90%. Include integration tests. Performance benchmarks included. Support Windows/Linux/macOS. Include CI/CD pipeline configuration."
+  },
+  {
+    "problem_id": "easy_003",
+    "complexity": "easy",
+    "domain": "api",
+    "problem_description": "Create a simple calculator API with basic arithmetic operations (add, subtract, multiply, divide)",
+    "prd_context": "Learning project for API development. Support four basic math operations with two numbers.",
+    "design_context": "Use Flask framework. Create simple REST endpoints. Return JSON responses with results.",
+    "code_context": "Use Flask with basic routing. Include input validation. Handle division by zero errors.",
+    "quality_context": "API should handle invalid inputs gracefully. Include basic testing and clear documentation."
+  },
+  {
+    "problem_id": "easy_004",
+    "complexity": "easy",
+    "domain": "ml_pipeline",
+    "problem_description": "Build a simple number guessing game that learns from user feedback to improve its guesses",
+    "prd_context": "Interactive learning game. Computer guesses user's number and learns from 'higher' or 'lower' feedback.",
+    "design_context": "Use binary search algorithm. Store simple statistics about guess accuracy. Command-line interface.",
+    "code_context": "Implement basic binary search. Use simple data structures. Include clear user prompts and feedback.",
+    "quality_context": "Game should converge to correct answer efficiently. Include input validation and clear instructions."
+  },
+  {
+    "problem_id": "easy_005",
+    "complexity": "easy",
+    "domain": "devops_tool",
+    "problem_description": "Create a simple file backup script that copies files from one directory to another with timestamp",
+    "prd_context": "Basic backup utility for personal use. Copy files and add timestamp to backup directory name.",
+    "design_context": "Use Python's shutil and os modules. Create timestamped backup directories. Handle common file operations.",
+    "code_context": "Use standard library modules only. Include progress feedback. Handle file permission errors gracefully.",
+    "quality_context": "Script should be reliable and provide clear feedback. Include basic logging and error handling."
+  },
+  {
+    "problem_id": "simple_001",
+    "complexity": "simple",
+    "domain": "web_app",
+    "problem_description": "Create a personal task management web application with user authentication and CRUD operations for tasks",
+    "prd_context": "Company uses Agile methodology. PRDs must include user stories in Given-When-Then format. Focus on MVP features only.",
+    "design_context": "Tech stack: Python Flask, SQLite database, Bootstrap CSS. Follow MVC architecture pattern. Include API endpoints documentation.",
+    "code_context": "Use Flask-SQLAlchemy for ORM. Include unit tests with pytest. Follow PEP 8 coding standards. Include requirements.txt with pinned versions.",
+    "quality_context": "Code coverage must be >80%. All API endpoints must have error handling. Include logging for debugging."
+  },
+  {
+    "problem_id": "simple_002", 
+    "complexity": "simple",
+    "domain": "data_processing",
+    "problem_description": "Build a CSV data validator that checks data types, missing values, and generates quality reports",
+    "prd_context": "Target users are data analysts. Must support common data validation rules. Generate both summary and detailed reports.",
+    "design_context": "Use pandas for data processing. Support CSV files up to 100MB. Include configurable validation rules via JSON config.",
+    "code_context": "Include command-line interface using Click. Add progress bars for large files. Use type hints throughout.",
+    "quality_context": "Include performance benchmarks. Test with various CSV formats. Document all validation rules clearly."
+  },
+  {
+    "problem_id": "simple_003",
+    "complexity": "simple", 
+    "domain": "api",
+    "problem_description": "Create a REST API for a simple inventory management system with products and categories",
+    "prd_context": "Small business inventory needs. Support basic CRUD operations. Include search and filtering capabilities.",
+    "design_context": "Use FastAPI framework. PostgreSQL database. Include OpenAPI documentation. Implement pagination for large datasets.",
+    "code_context": "Use Pydantic for data validation. Include database migrations with Alembic. Add Docker configuration.",
+    "quality_context": "API response time must be <200ms. Include integration tests. Document all endpoints with examples."
+  },
+  {
+    "problem_id": "simple_004",
+    "complexity": "simple",
+    "domain": "ml_pipeline", 
+    "problem_description": "Build a machine learning pipeline for predicting house prices using basic regression models",
+    "prd_context": "Real estate company needs automated price predictions. Must handle missing data and provide confidence intervals.",
+    "design_context": "Use scikit-learn for ML models. Support multiple algorithms (Linear, Random Forest, XGBoost). Include model comparison.",
+    "code_context": "Use pandas for data preprocessing. Include feature engineering pipeline. Save models using joblib.",
+    "quality_context": "Model accuracy must be >85% on test set. Include cross-validation. Document feature importance."
+  },
+  {
+    "problem_id": "simple_005",
+    "complexity": "simple",
+    "domain": "devops_tool",
+    "problem_description": "Create a log analyzer tool that parses application logs and generates alerts for error patterns",
+    "prd_context": "DevOps team needs automated log monitoring. Support multiple log formats. Generate actionable alerts.",
+    "design_context": "Support real-time log streaming. Use regex patterns for error detection. Include configurable alert thresholds.",
+    "code_context": "Use asyncio for concurrent log processing. Include configuration via YAML files. Add email notifications.",
+    "quality_context": "Process logs in real-time with <1 second delay. Include comprehensive error handling. Test with large log files."
+  },
+  {
+    "problem_id": "medium_001",
+    "complexity": "medium",
+    "domain": "web_app",
+    "problem_description": "Develop a collaborative project management platform with real-time updates, file sharing, and team communication",
+    "prd_context": "Enterprise software for remote teams. Must support 100+ concurrent users. Include role-based permissions and audit trails.",
+    "design_context": "Microservices architecture with Docker. Use Redis for caching, PostgreSQL for data. WebSocket for real-time updates. Include load balancing.",
+    "code_context": "Use Django REST framework. Implement JWT authentication. Include file upload with virus scanning. Use Celery for background tasks.",
+    "quality_context": "System must handle 1000+ concurrent users. 99.9% uptime requirement. Include comprehensive monitoring and alerting."
+  },
+  {
+    "problem_id": "medium_002",
+    "complexity": "medium", 
+    "domain": "data_processing",
+    "problem_description": "Build a distributed data processing system for analyzing large-scale e-commerce transaction data with fraud detection",
+    "prd_context": "Financial services company processing millions of transactions daily. Must detect fraud in real-time with <1% false positive rate.",
+    "design_context": "Use Apache Kafka for streaming. Implement machine learning models for fraud detection. Include data lake architecture with partitioning.",
+    "code_context": "Use Apache Spark for distributed processing. Implement feature stores. Include model versioning and A/B testing framework.",
+    "quality_context": "Process 10M+ transactions per hour. Fraud detection latency <100ms. Include model performance monitoring and drift detection."
+  },
+  {
+    "problem_id": "medium_003",
+    "complexity": "medium",
+    "domain": "api",
+    "problem_description": "Create a comprehensive API gateway with authentication, rate limiting, monitoring, and service discovery",
+    "prd_context": "Microservices architecture needs centralized API management. Support multiple authentication methods. Include developer portal.",
+    "design_context": "Use Kong or custom solution. Implement OAuth2, JWT, API keys. Include circuit breaker pattern. Support GraphQL and REST.",
+    "code_context": "Use Go or Python for high performance. Include metrics collection with Prometheus. Implement health checks and auto-scaling.",
+    "quality_context": "Handle 100K+ requests per second. 99.99% availability. Include comprehensive security scanning and penetration testing."
+  },
+  {
+    "problem_id": "medium_004",
+    "complexity": "medium",
+    "domain": "ml_pipeline",
+    "problem_description": "Develop an end-to-end MLOps pipeline for computer vision model training, deployment, and monitoring",
+    "prd_context": "AI company needs automated model lifecycle management. Support multiple model versions. Include A/B testing for model performance.",
+    "design_context": "Use Kubernetes for orchestration. Implement MLflow for experiment tracking. Include data versioning with DVC. Support GPU training.",
+    "code_context": "Use PyTorch/TensorFlow for models. Implement automated data validation. Include model serving with TorchServe/TensorFlow Serving.",
+    "quality_context": "Model training time <4 hours. Deployment time <10 minutes. Include model performance monitoring and automatic rollback."
+  },
+  {
+    "problem_id": "medium_005",
+    "complexity": "medium",
+    "domain": "devops_tool",
+    "problem_description": "Build a comprehensive CI/CD pipeline orchestrator with multi-cloud deployment and rollback capabilities",
+    "prd_context": "Enterprise needs unified deployment across AWS, Azure, GCP. Support blue-green deployments. Include compliance and security scanning.",
+    "design_context": "Use Kubernetes operators. Implement GitOps workflow. Include infrastructure as code with Terraform. Support multiple environments.",
+    "code_context": "Use Go for performance. Implement webhook handlers. Include secret management with Vault. Add comprehensive logging and monitoring.",
+    "quality_context": "Deployment success rate >99%. Rollback time <5 minutes. Include security vulnerability scanning and compliance reporting."
+  },
+  {
+    "problem_id": "medium_006",
+    "complexity": "medium",
+    "domain": "web_app", 
+    "problem_description": "Create a multi-tenant SaaS platform for customer relationship management with advanced analytics and reporting",
+    "prd_context": "B2B SaaS targeting SMBs. Must support custom branding per tenant. Include advanced reporting with data visualization.",
+    "design_context": "Multi-tenant architecture with shared database. Use React frontend with Python backend. Include real-time analytics dashboard.",
+    "code_context": "Use Django with tenant isolation. Implement background job processing. Include data export capabilities. Add comprehensive API documentation.",
+    "quality_context": "Support 10K+ tenants. Page load time <2 seconds. Include automated testing and deployment pipeline."
+  },
+  {
+    "problem_id": "medium_007",
+    "complexity": "medium",
+    "domain": "data_processing",
+    "problem_description": "Develop a real-time data streaming platform for IoT sensor data with anomaly detection and alerting",
+    "prd_context": "Manufacturing company with 10K+ IoT sensors. Need real-time monitoring and predictive maintenance alerts.",
+    "design_context": "Use Apache Kafka for streaming. Implement time-series database (InfluxDB). Include machine learning for anomaly detection.",
+    "code_context": "Use Python with asyncio for high throughput. Implement data validation and cleansing. Include visualization dashboard.",
+    "quality_context": "Process 1M+ data points per minute. Anomaly detection latency <5 seconds. Include comprehensive monitoring and alerting."
+  },
+  {
+    "problem_id": "medium_008",
+    "complexity": "medium",
+    "domain": "api",
+    "problem_description": "Build a GraphQL API with real-time subscriptions for a social media platform with content moderation",
+    "prd_context": "Social media startup needs scalable API. Support real-time feeds and messaging. Include automated content moderation.",
+    "design_context": "Use GraphQL with subscriptions. Implement Redis for caching. Include content moderation ML models. Support file uploads.",
+    "code_context": "Use Python with Graphene or Node.js. Implement rate limiting and abuse prevention. Include comprehensive testing suite.",
+    "quality_context": "Support 1M+ active users. API response time <100ms. Include security testing and content moderation accuracy >95%."
+  },
+  {
+    "problem_id": "medium_009",
+    "complexity": "medium",
+    "domain": "ml_pipeline",
+    "problem_description": "Create an automated feature engineering pipeline for time-series forecasting with model selection and hyperparameter tuning",
+    "prd_context": "Financial services needs automated trading signals. Must handle multiple asset classes. Include risk management constraints.",
+    "design_context": "Use Apache Airflow for orchestration. Implement feature stores. Include automated model selection with cross-validation.",
+    "code_context": "Use Python with scikit-learn, XGBoost, LightGBM. Implement parallel hyperparameter tuning. Include model interpretability.",
+    "quality_context": "Model training time <2 hours. Prediction accuracy >80%. Include backtesting framework and risk metrics."
+  },
+  {
+    "problem_id": "medium_010",
+    "complexity": "medium",
+    "domain": "devops_tool",
+    "problem_description": "Develop a comprehensive infrastructure monitoring and alerting system with predictive failure detection",
+    "prd_context": "Enterprise IT needs proactive monitoring. Support hybrid cloud environments. Include cost optimization recommendations.",
+    "design_context": "Use Prometheus for metrics collection. Implement Grafana dashboards. Include machine learning for predictive analytics.",
+    "code_context": "Use Go for agents and Python for ML. Implement custom metrics collectors. Include alert correlation and noise reduction.",
+    "quality_context": "Monitor 1000+ servers. Alert response time <30 seconds. Include 95% accuracy for failure prediction."
+  },
+  {
+    "problem_id": "medium_011",
+    "complexity": "medium",
+    "domain": "web_app",
+    "problem_description": "Build a comprehensive e-learning platform with video streaming, interactive assessments, and progress tracking",
+    "prd_context": "Educational institution needs online learning platform. Support 10K+ concurrent students. Include accessibility compliance.",
+    "design_context": "Use CDN for video delivery. Implement adaptive streaming. Include real-time collaboration tools. Support mobile apps.",
+    "code_context": "Use React/Vue.js frontend with Python/Node.js backend. Implement video processing pipeline. Include offline capability.",
+    "quality_context": "Video streaming quality 99.9% uptime. Page load time <3 seconds. Include comprehensive analytics and reporting."
+  },
+  {
+    "problem_id": "medium_012",
+    "complexity": "medium",
+    "domain": "data_processing",
+    "problem_description": "Create a data lake architecture with automated data cataloging, lineage tracking, and quality monitoring",
+    "prd_context": "Large enterprise needs unified data platform. Support multiple data sources. Include data governance and compliance.",
+    "design_context": "Use Apache Spark for processing. Implement data catalog with metadata management. Include data lineage visualization.",
+    "code_context": "Use Python with PySpark. Implement data quality checks. Include automated schema evolution. Add comprehensive logging.",
+    "quality_context": "Process TB+ data daily. Data quality score >95%. Include automated data discovery and classification."
+  },
+  {
+    "problem_id": "medium_013",
+    "complexity": "medium",
+    "domain": "api",
+    "problem_description": "Develop a payment processing API with multi-currency support, fraud detection, and regulatory compliance",
+    "prd_context": "Fintech startup needs secure payment processing. Support multiple payment methods. Include PCI DSS compliance.",
+    "design_context": "Use microservices architecture. Implement event sourcing for audit trails. Include encryption and tokenization.",
+    "code_context": "Use Java/Python with Spring Boot/FastAPI. Implement circuit breaker pattern. Include comprehensive security testing.",
+    "quality_context": "Process 100K+ transactions per hour. 99.99% availability. Include fraud detection accuracy >98%."
+  },
+  {
+    "problem_id": "medium_014",
+    "complexity": "medium",
+    "domain": "ml_pipeline",
+    "problem_description": "Build a recommendation engine with real-time personalization and A/B testing framework",
+    "prd_context": "E-commerce company needs personalized recommendations. Support real-time updates. Include business metrics tracking.",
+    "design_context": "Use collaborative filtering and content-based methods. Implement real-time feature serving. Include A/B testing platform.",
+    "code_context": "Use Python with TensorFlow/PyTorch. Implement feature stores. Include model serving with low latency. Add comprehensive monitoring.",
+    "quality_context": "Recommendation latency <50ms. Click-through rate improvement >20%. Include model performance monitoring."
+  },
+  {
+    "problem_id": "medium_015",
+    "complexity": "medium",
+    "domain": "devops_tool",
+    "problem_description": "Create a comprehensive security scanning and compliance automation platform for cloud infrastructure",
+    "prd_context": "Enterprise needs automated security compliance. Support multiple cloud providers. Include remediation recommendations.",
+    "design_context": "Use cloud-native APIs for scanning. Implement policy as code. Include vulnerability database integration.",
+    "code_context": "Use Python/Go for scanners. Implement parallel scanning. Include custom rule engine. Add comprehensive reporting.",
+    "quality_context": "Scan 1000+ resources per hour. False positive rate <5%. Include automated remediation for critical issues."
+  },
+  {
+    "problem_id": "medium_016",
+    "complexity": "medium",
+    "domain": "web_app",
+    "problem_description": "Develop a real-time collaborative document editing platform with version control and conflict resolution",
+    "prd_context": "Enterprise needs Google Docs alternative. Support 100+ concurrent editors per document. Include advanced formatting.",
+    "design_context": "Use operational transformation for conflict resolution. Implement WebSocket for real-time updates. Include document history.",
+    "code_context": "Use Node.js/Python for backend. Implement rich text editor. Include file format conversion. Add comprehensive testing.",
+    "quality_context": "Support 1000+ concurrent users. Conflict resolution accuracy >99%. Include performance optimization for large documents."
+  },
+  {
+    "problem_id": "medium_017",
+    "complexity": "medium",
+    "domain": "data_processing",
+    "problem_description": "Build a real-time analytics platform for clickstream data with interactive dashboards and alerting",
+    "prd_context": "Digital marketing agency needs real-time campaign analytics. Support multiple data sources. Include custom metrics.",
+    "design_context": "Use Apache Kafka for streaming. Implement OLAP cube for fast queries. Include real-time dashboard updates.",
+    "code_context": "Use Python/Scala with Apache Spark. Implement data aggregation pipelines. Include interactive visualizations.",
+    "quality_context": "Process 10M+ events per hour. Query response time <2 seconds. Include automated anomaly detection."
+  },
+  {
+    "problem_id": "medium_018",
+    "complexity": "medium",
+    "domain": "api",
+    "problem_description": "Create a comprehensive API for healthcare data management with HIPAA compliance and interoperability",
+    "prd_context": "Healthcare provider needs secure patient data API. Support HL7 FHIR standards. Include audit logging.",
+    "design_context": "Use FHIR R4 specification. Implement OAuth2 with SMART on FHIR. Include data encryption and access controls.",
+    "code_context": "Use Java/Python with Spring Boot/FastAPI. Implement comprehensive validation. Include integration testing.",
+    "quality_context": "99.99% availability. HIPAA compliance verification. Include comprehensive security testing and penetration testing."
+  },
+  {
+    "problem_id": "medium_019",
+    "complexity": "medium",
+    "domain": "ml_pipeline",
+    "problem_description": "Develop a natural language processing pipeline for sentiment analysis with multi-language support",
+    "prd_context": "Social media monitoring company needs multilingual sentiment analysis. Support 20+ languages. Include entity recognition.",
+    "design_context": "Use transformer models (BERT, RoBERTa). Implement model serving with auto-scaling. Include data preprocessing pipeline.",
+    "code_context": "Use Python with Transformers library. Implement batch and real-time processing. Include model fine-tuning capabilities.",
+    "quality_context": "Sentiment accuracy >90% across languages. Processing latency <500ms. Include model performance monitoring."
+  },
+  {
+    "problem_id": "medium_020",
+    "complexity": "medium",
+    "domain": "devops_tool",
+    "problem_description": "Build a comprehensive backup and disaster recovery automation system for multi-cloud environments",
+    "prd_context": "Enterprise needs automated DR across AWS, Azure, GCP. Support RTO <4 hours, RPO <1 hour. Include compliance reporting.",
+    "design_context": "Use cloud-native backup services. Implement cross-region replication. Include automated failover testing.",
+    "code_context": "Use Python/Go for automation. Implement backup verification. Include restoration testing. Add comprehensive monitoring.",
+    "quality_context": "Backup success rate >99.9%. Recovery time <4 hours. Include automated testing and compliance reporting."
+  },
+  {
+    "problem_id": "complex_001",
+    "complexity": "complex",
+    "domain": "web_app",
+    "problem_description": "Create a comprehensive enterprise resource planning (ERP) system with modules for finance, HR, inventory, and CRM",
+    "prd_context": "Fortune 500 company with 50K+ employees across 30 countries. Must integrate with SAP, Salesforce, and legacy mainframe systems. Support real-time financial reporting, multi-currency transactions, and regulatory compliance (SOX, GDPR). Mobile-first design with offline sync. Multi-language support (15 languages). Role-based access control with SSO integration.",
+    "design_context": "Event-sourced microservices with Kafka streams. CQRS with separate read/write models. Multi-tenant SaaS with tenant-specific customizations. API-first design with GraphQL federation. Implement circuit breakers, bulkheads, and timeout patterns. Use domain-driven design with bounded contexts. Include audit trails and data lineage tracking.",
+    "code_context": "Java 17+ with Spring Boot 3.x, reactive programming with WebFlux. Use Kubernetes with Istio service mesh. Implement distributed tracing with OpenTelemetry. Database per service pattern with PostgreSQL and MongoDB. Include comprehensive OpenAPI 3.0 specs. Use test containers for integration testing. Implement feature flags and A/B testing framework.",
+    "quality_context": "Sub-200ms API response times at 99th percentile. Support 100K concurrent users with auto-scaling. Zero-downtime deployments with blue-green strategy. Chaos engineering with fault injection. Security: OAuth 2.1, mTLS, field-level encryption. Include performance testing with JMeter, security scanning with OWASP ZAP, and infrastructure as code with Terraform."
+  },
+  {
+    "problem_id": "complex_002",
+    "complexity": "complex",
+    "domain": "data_processing",
+    "problem_description": "Develop a real-time data platform for autonomous vehicle sensor fusion with edge computing and cloud integration",
+    "prd_context": "Automotive company needs real-time sensor processing. Support LiDAR, camera, radar data. Include safety-critical requirements.",
+    "design_context": "Use edge computing for low latency. Implement data fusion algorithms. Include cloud integration for fleet management.",
+    "code_context": "Use C++/Python for performance. Implement real-time processing with ROS. Include comprehensive testing and simulation.",
+    "quality_context": "Processing latency <10ms. Safety integrity level (SIL) 4 compliance. Include comprehensive validation and testing."
+  },
+  {
+    "problem_id": "complex_003",
+    "complexity": "complex",
+    "domain": "api",
+    "problem_description": "Build a comprehensive financial trading platform API with real-time market data, order management, and risk controls",
+    "prd_context": "Investment bank needs high-frequency trading platform. Support microsecond latency. Include regulatory compliance (MiFID II).",
+    "design_context": "Use low-latency architecture with FPGA acceleration. Implement market data normalization. Include risk management engine.",
+    "code_context": "Use C++/Java for performance. Implement lock-free data structures. Include comprehensive testing and simulation.",
+    "quality_context": "Order latency <100 microseconds. 99.999% availability. Include comprehensive risk management and compliance reporting."
+  },
+  {
+    "problem_id": "complex_004",
+    "complexity": "complex",
+    "domain": "ml_pipeline",
+    "problem_description": "Create an advanced AI platform for drug discovery with molecular modeling, protein folding prediction, and clinical trial optimization",
+    "prd_context": "Pharmaceutical company needs AI-driven drug discovery. Support molecular simulation. Include clinical trial design optimization.",
+    "design_context": "Use high-performance computing clusters. Implement molecular dynamics simulations. Include quantum computing integration.",
+    "code_context": "Use Python/C++ with CUDA. Implement distributed training. Include molecular visualization. Add comprehensive validation.",
+    "quality_context": "Molecular simulation accuracy >95%. Training time <24 hours for large models. Include comprehensive validation against experimental data."
+  },
+  {
+    "problem_id": "complex_005",
+    "complexity": "complex",
+    "domain": "devops_tool",
+    "problem_description": "Develop a comprehensive cloud-native platform for managing global infrastructure with AI-driven optimization and self-healing",
+    "prd_context": "Global enterprise needs intelligent infrastructure management. Support multi-cloud and edge locations. Include cost optimization.",
+    "design_context": "Use Kubernetes operators and custom controllers. Implement AI-driven resource optimization. Include self-healing capabilities.",
+    "code_context": "Use Go/Python for controllers. Implement machine learning for optimization. Include comprehensive monitoring and alerting.",
+    "quality_context": "Manage 100K+ resources globally. Cost optimization >30%. Include 99.99% platform availability."
+  },
+  {
+    "problem_id": "complex_006",
+    "complexity": "complex",
+    "domain": "web_app",
+    "problem_description": "Build a comprehensive digital banking platform with real-time fraud detection, regulatory compliance, and omnichannel experience",
+    "prd_context": "Digital bank needs complete banking platform. Support millions of customers. Include regulatory compliance (PCI DSS, SOX, Basel III).",
+    "design_context": "Use event-driven microservices. Implement CQRS with event sourcing. Include real-time fraud detection and KYC/AML compliance.",
+    "code_context": "Use Java/C# with Spring Boot/.NET Core. Implement blockchain for audit trails. Include comprehensive security testing.",
+    "quality_context": "Support 10M+ customers. Transaction processing <1 second. Include 99.999% availability and comprehensive compliance reporting."
+  },
+  {
+    "problem_id": "complex_007",
+    "complexity": "complex",
+    "domain": "data_processing",
+    "problem_description": "Create a global-scale data mesh architecture with federated governance, real-time analytics, and privacy-preserving computation",
+    "prd_context": "Multinational corporation needs data mesh for 100+ business units. Include data sovereignty and privacy compliance (GDPR, CCPA).",
+    "design_context": "Use federated data architecture. Implement differential privacy. Include cross-border data governance and lineage tracking.",
+    "code_context": "Use Scala/Python with Apache Spark. Implement privacy-preserving algorithms. Include comprehensive data governance tools.",
+    "quality_context": "Process PB+ data daily. Privacy compliance >99%. Include automated data classification and governance reporting."
+  },
+  {
+    "problem_id": "complex_008",
+    "complexity": "complex",
+    "domain": "api",
+    "problem_description": "Develop a comprehensive IoT platform API for smart city infrastructure with edge computing and predictive analytics",
+    "prd_context": "Smart city initiative needs IoT platform for 1M+ devices. Include traffic management, energy optimization, and emergency response.",
+    "design_context": "Use edge computing for low latency. Implement digital twin architecture. Include predictive analytics for city planning.",
+    "code_context": "Use Go/Rust for performance. Implement time-series databases. Include machine learning for optimization. Add comprehensive monitoring.",
+    "quality_context": "Support 10M+ IoT devices. Data processing latency <100ms. Include 99.99% availability and comprehensive analytics."
+  },
+  {
+    "problem_id": "complex_009",
+    "complexity": "complex",
+    "domain": "ml_pipeline",
+    "problem_description": "Build an advanced computer vision platform for autonomous systems with real-time object detection, tracking, and decision making",
+    "prd_context": "Robotics company needs vision platform for autonomous robots. Support real-time navigation and manipulation. Include safety guarantees.",
+    "design_context": "Use edge AI accelerators. Implement SLAM algorithms. Include sensor fusion and uncertainty quantification.",
+    "code_context": "Use C++/Python with CUDA. Implement real-time inference. Include comprehensive simulation and testing frameworks.",
+    "quality_context": "Object detection accuracy >99%. Processing latency <10ms. Include safety validation and comprehensive testing."
+  },
+  {
+    "problem_id": "complex_010",
+    "complexity": "complex",
+    "domain": "devops_tool",
+    "problem_description": "Create a comprehensive quantum computing platform with hybrid classical-quantum workflows and error correction",
+    "prd_context": "Research institution needs quantum computing platform. Support multiple quantum hardware backends. Include error mitigation.",
+    "design_context": "Use hybrid classical-quantum architecture. Implement quantum error correction. Include quantum algorithm optimization.",
+    "code_context": "Use Python/C++ with Qiskit/Cirq. Implement quantum circuit optimization. Include comprehensive simulation and validation.",
+    "quality_context": "Quantum fidelity >99%. Circuit optimization >50% gate reduction. Include comprehensive quantum algorithm validation."
+  },
+  {
+    "problem_id": "complex_011",
+    "complexity": "complex",
+    "domain": "web_app",
+    "problem_description": "Develop a comprehensive metaverse platform with virtual worlds, avatar systems, and blockchain integration",
+    "prd_context": "Gaming company needs metaverse platform. Support 1M+ concurrent users. Include NFT marketplace and virtual economy.",
+    "design_context": "Use distributed game servers. Implement blockchain for digital assets. Include real-time 3D rendering and physics simulation.",
+    "code_context": "Use C++/C# with Unreal Engine/Unity. Implement blockchain integration. Include comprehensive multiplayer networking.",
+    "quality_context": "Support 1M+ concurrent users. Rendering performance >60 FPS. Include comprehensive security and anti-cheat systems."
+  },
+  {
+    "problem_id": "complex_012",
+    "complexity": "complex",
+    "domain": "data_processing",
+    "problem_description": "Build a comprehensive climate modeling platform with global weather simulation, climate prediction, and impact analysis",
+    "prd_context": "Climate research organization needs global climate modeling. Support exascale computing. Include uncertainty quantification.",
+    "design_context": "Use high-performance computing clusters. Implement atmospheric and oceanic models. Include machine learning for downscaling.",
+    "code_context": "Use Fortran/C++ with MPI. Implement parallel algorithms. Include comprehensive validation against observational data.",
+    "quality_context": "Model resolution <1km globally. Prediction accuracy >90%. Include comprehensive uncertainty quantification and validation."
+  },
+  {
+    "problem_id": "complex_013",
+    "complexity": "complex",
+    "domain": "api",
+    "problem_description": "Create a comprehensive space mission control API with real-time telemetry, command systems, and mission planning",
+    "prd_context": "Space agency needs mission control platform. Support multiple simultaneous missions. Include safety-critical requirements.",
+    "design_context": "Use fault-tolerant architecture. Implement real-time telemetry processing. Include mission planning and trajectory optimization.",
+    "code_context": "Use Ada/C++ for safety-critical systems. Implement redundant systems. Include comprehensive testing and validation.",
+    "quality_context": "System availability >99.999%. Command latency <100ms. Include comprehensive safety validation and testing."
+  },
+  {
+    "problem_id": "complex_014",
+    "complexity": "complex",
+    "domain": "ml_pipeline",
+    "problem_description": "Develop an advanced brain-computer interface platform with real-time neural signal processing and adaptive learning",
+    "prd_context": "Medical device company needs BCI platform. Support real-time neural decoding. Include FDA regulatory compliance.",
+    "design_context": "Use real-time signal processing. Implement adaptive machine learning algorithms. Include patient safety monitoring.",
+    "code_context": "Use C++/Python with real-time constraints. Implement neural signal processing. Include comprehensive medical device validation.",
+    "quality_context": "Signal processing latency <1ms. Decoding accuracy >95%. Include FDA compliance and comprehensive safety validation."
+  },
+  {
+    "problem_id": "complex_015",
+    "complexity": "complex",
+    "domain": "devops_tool",
+    "problem_description": "Build a comprehensive cybersecurity platform with AI-driven threat detection, automated response, and forensic analysis",
+    "prd_context": "Enterprise security needs AI-driven cybersecurity. Support real-time threat detection across global infrastructure. Include compliance reporting.",
+    "design_context": "Use machine learning for threat detection. Implement automated incident response. Include digital forensics capabilities.",
+    "code_context": "Use Python/Go for security tools. Implement real-time analysis. Include comprehensive threat intelligence integration.",
+    "quality_context": "Threat detection accuracy >99%. Response time <1 minute. Include comprehensive compliance reporting and forensic capabilities."
+  }
+]
