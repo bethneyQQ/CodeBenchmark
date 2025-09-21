@@ -1,6 +1,8 @@
 from . import (
     anthropic_llms,
     api_models,
+    claude_local,
+    claude_code_local,
     dummy,
     gguf,
     hf_audiolm,
