@@ -65,7 +65,7 @@ export ANTHROPIC_API_KEY="your_key_here"
 
 lm_eval \
   --model anthropic-chat \
-  --model_args model=claude-3-haiku-20240307 \
+  --model_args model= claude-sonnet-4-20250514 \
   --tasks python_code_quality \
   --output_path test_results/claude_test1.json \
   --log_samples \
