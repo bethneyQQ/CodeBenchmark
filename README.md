@@ -73,7 +73,7 @@ lm_eval \
   --batch_size 1
 ```
 
-## 📊 **Understanding Results**
+##  **Understanding Results**
 
 ### Output Files
 ```
@@ -102,7 +102,7 @@ cat output_code_results/samples_python_code_quality.jsonl
 grep -E "(code_quality_score|functional_correctness|syntax_validity|code_style_score)" output_code_results/qwen_code_quality_results.json
 ```
 
-## 🎯 **Test Problems (First 2 with --limit 2)**
+## **Test Problems (First 2 with --limit 2)**
 
 1. **Factorial Function**
    - Calculate n! with proper error handling
@@ -132,12 +132,3 @@ lm_eval --model dummy --tasks python_code_quality --limit 1 --predict_only --out
 python test_task_simple.py
 ```
 
-## 🎉 **You're Ready!**
-
-1. ✅ Task is fully tested and working
-2. ✅ Multiple API options available
-3. ✅ Comprehensive metrics implemented
-4. ✅ Safe code execution environment
-5. ✅ 20 diverse Python problems in dataset
-
-Choose your preferred command and start evaluating! 🚀
