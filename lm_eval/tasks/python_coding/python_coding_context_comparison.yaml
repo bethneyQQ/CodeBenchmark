@@ -1,0 +1,28 @@
+group: python_coding_context_comparison
+group_alias: "Python Coding Context Comparison Suite"
+task:
+  - task: python_code_completion
+    task_alias: "Code Completion (Full Context)"
+  - task: python_code_completion_minimal_context  
+    task_alias: "Code Completion (Minimal Context)"
+  - task: python_code_completion_no_context
+    task_alias: "Code Completion (No Context)"
+  - task: python_code_repair
+    task_alias: "Code Repair (Full Context)"
+  - task: python_code_translation
+    task_alias: "Code Translation (Full Context)"
+  - task: python_docstring_generation
+    task_alias: "Docstring Generation (Full Context)"
+  - task: python_function_generation
+    task_alias: "Function Generation (Full Context)"
+aggregate_metric_list:
+  - metric: exact_match
+    aggregation: mean
+    weight_by_size: true
+tag:
+  - python_coding
+  - context_comparison
+  - comprehensive_evaluation
+metadata:
+  version: 1.0
+  description: "Comprehensive comparison of Python coding performance across different context configurations to measure the impact of company-specific requirements and standards."

@@ -1,0 +1,18 @@
+group: python_coding_suite
+group_alias: "Python Coding Evaluation Suite"
+task:
+  - python_code_completion
+  - python_code_repair
+  - python_code_translation
+  - python_docstring_generation
+  - python_function_generation
+aggregate_metric_list:
+  - metric: exact_match
+    aggregation: mean
+    weight_by_size: true
+tag:
+  - python_coding
+  - comprehensive_evaluation
+metadata:
+  version: 1.0
+  description: "Comprehensive evaluation suite for Python coding capabilities across 5 key areas: code completion, repair, translation, docstring generation, and function generation."
