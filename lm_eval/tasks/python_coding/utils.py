@@ -9,10 +9,115 @@ import json
 import logging
 import re
 import ast
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Optional
+
+def load_dataset(**kwargs):
+    """Load the Python coding dataset with configurable path support.
+    
+    This function supports custom dataset paths via metadata args and 
+    filters data by task category.
+    
+    Returns:
+        dict: Dataset with test split containing the problems
+    """
+    # Get metadata from kwargs 
+    metadata_args = kwargs.get('metadata_args') or kwargs.get('metadata') or {}
+    
+    dataset_path = None
+    if metadata_args and isinstance(metadata_args, dict):
+        # Check for dataset_path in metadata
+        if 'dataset_path' in metadata_args:
+            dataset_path = metadata_args['dataset_path']
+        # Check for multiple dataset paths  
+        elif 'dataset_paths' in metadata_args:
+            paths = metadata_args['dataset_paths']
+            if isinstance(paths, list) and len(paths) > 0:
+                dataset_path = paths[0]  # Use first path by default
+    
+    if not dataset_path:
+        # Default to problems.jsonl in the task directory
+        current_dir = os.path.dirname(__file__)
+        dataset_path = os.path.join(current_dir, 'problems.jsonl')
+    
+    # Load the dataset
+    with open(dataset_path, 'r', encoding='utf-8') as f:
+        data = [json.loads(line) for line in f]
+    
+    # Filter data by task category if available
+    # Try to determine task type from the calling context
+    task_category_map = {
+        'python_code_completion': 'code_completion',
+        'python_code_completion_minimal_context': 'code_completion',
+        'python_code_completion_no_context': 'code_completion',
+        'python_code_repair': 'code_repair',
+        'python_code_repair_no_context': 'code_repair',
+        'python_function_generation': 'function_generation',
+        'python_docstring_generation': 'docstring_generation',
+        'python_code_translation': 'code_translation'
+    }
+    
+    # Try to get task name from calling context
+    import inspect
+    frame = inspect.currentframe()
+    task_name = None
+    try:
+        # Look through the call stack to find the task name
+        for i in range(10):  # Look up to 10 frames
+            caller_frame = frame
+            for _ in range(i):
+                if caller_frame.f_back:
+                    caller_frame = caller_frame.f_back
+                else:
+                    break
+            
+            # Check if we can find task name in local variables
+            local_vars = caller_frame.f_locals
+            if 'self' in local_vars and hasattr(local_vars['self'], 'config'):
+                config = local_vars['self'].config
+                if hasattr(config, 'task'):
+                    task_name = config.task
+                    break
+    except:
+        pass
+    finally:
+        del frame
+    
+    # Filter by category if we found the task name
+    if task_name and task_name in task_category_map:
+        expected_category = task_category_map[task_name]
+        filtered_data = [item for item in data if item.get('category') == expected_category]
+        if filtered_data:
+            data = filtered_data
+    
+    # Create Dataset object
+    from datasets import Dataset
+    dataset = Dataset.from_list(data)
+    
+    return {"test": dataset}
+
+# Avoid noisy repeated NLTK downloads: check resources before attempting to download
+def _ensure_nltk_resources(resources: List[str]):
+    try:
+        import nltk
+        from nltk.data import find
+    except Exception:
+        # If nltk isn't installed, skip silently; callers can decide to install if needed
+        return
+
+    for res in resources:
+        try:
+            find(res)
+        except LookupError:
+            try:
+                nltk.download(res.split('/')[-1], quiet=True)
+            except Exception:
+                # Ignore download failures; downstream code should handle missing data
+                pass
 
 # Load metrics
 try:
+    # Ensure common NLTK resources are present to avoid repeated download messages
+    _ensure_nltk_resources(['corpora/wordnet', 'tokenizers/punkt', 'corpora/omw-1.4'])
     bleu_metric = hf_evaluate.load("bleu")
     rouge_metric = hf_evaluate.load("rouge")
     meteor_metric = hf_evaluate.load("meteor")

@@ -1,9 +1,7 @@
 task: python_code_completion
-dataset_path: json
-dataset_name: null
-dataset_kwargs:
-  data_files: problems.jsonl
-test_split: train
+custom_dataset: !function utils.load_dataset
+
+test_split: test
 output_type: generate_until
 process_docs: !function utils.process_docs_code_completion
 doc_to_text: !function utils.doc_to_text

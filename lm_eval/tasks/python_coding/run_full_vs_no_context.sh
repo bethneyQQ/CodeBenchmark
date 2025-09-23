@@ -123,22 +123,24 @@ run_evaluation() {
     # Create output directory for this specific file
     mkdir -p "$(dirname "$output_file")"
     
-    echo "   🚀 Command: lm_eval --model $MODEL_TYPE --model_args \"$MODEL_ARGS\" --tasks $task_name --output_path $output_file --limit $LIMIT"
-    
-    lm_eval \
+    echo "   🚀 Command: python -m lm_eval --model $MODEL_TYPE --model_args \"$MODEL_ARGS\" --tasks $task_name --output_path $output_file --limit $LIMIT"
+
+    # Change to the lm_eval directory to run as module and include the task directory
+    cd "$LM_EVAL_ROOT" && python -m lm_eval \
         --model "$MODEL_TYPE" \
         --model_args "$MODEL_ARGS" \
         --tasks "$task_name" \
-        --output_path "$output_file" \
+        --output_path "$SCRIPT_DIR/$output_file" \
         --limit "$LIMIT" \
         --log_samples \
-        --verbosity DEBUG
+        --verbosity DEBUG \
+        --include_path "$SCRIPT_DIR"
     
     local exit_code=$?
     
     if [ $exit_code -eq 0 ]; then
         # lm_eval adds timestamps to filenames, so look for files that start with our expected name
-        local output_dir="$(dirname "$output_file")"
+        local output_dir="$SCRIPT_DIR/$(dirname "$output_file")"
         local base_name="$(basename "$output_file" .json)"
         local actual_file=$(find "$output_dir" -name "${base_name}*.json" -type f | head -1)
         
@@ -218,7 +220,7 @@ else
 fi
 echo ""
 echo "📊 Running Context Impact Analysis..."
-python analyze_context_impact.py --results_dir "$OUTPUT_DIR"
+cd "$SCRIPT_DIR" && python analyze_context_impact.py --results_dir "$OUTPUT_DIR"
 
 if [ $? -eq 0 ]; then
     echo ""

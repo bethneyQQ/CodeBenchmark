@@ -1,0 +1,157 @@
+{
+  "results": {
+    "python_code_completion": {
+      "alias": "python_code_completion",
+      "exact_match,extract_code": 0.0,
+      "exact_match_stderr,extract_code": "N/A",
+      "bleu,extract_code": 0.21898171327468466,
+      "bleu_stderr,extract_code": "N/A",
+      "context_adherence_score,extract_code": 1.0,
+      "context_adherence_score_stderr,extract_code": "N/A",
+      "style_compliance_score,extract_code": 0.8333333333333334,
+      "style_compliance_score_stderr,extract_code": "N/A",
+      "security_compliance_score,extract_code": 0.5,
+      "security_compliance_score_stderr,extract_code": "N/A",
+      "performance_awareness_score,extract_code": 0.5,
+      "performance_awareness_score_stderr,extract_code": "N/A"
+    }
+  },
+  "group_subtasks": {
+    "python_code_completion": []
+  },
+  "configs": {
+    "python_code_completion": {
+      "task": "python_code_completion",
+      "tag": [
+        "python_coding",
+        "code_completion"
+      ],
+      "dataset_path": "json",
+      "dataset_kwargs": {
+        "data_files": "./problems.jsonl"
+      },
+      "test_split": "train",
+      "process_docs": "def process_docs_code_completion(dataset: datasets.Dataset) -> datasets.Dataset:\n    \"\"\"Filter and process documents for code completion task.\"\"\"\n    def _process_doc(doc):\n        if doc[\"category\"] != \"code_completion\":\n            return None\n        return doc\n    \n    # Filter only code completion problems\n    filtered = dataset.filter(lambda x: x[\"category\"] == \"code_completion\")\n    return filtered\n",
+      "doc_to_text": "def doc_to_text(doc):\n    \"\"\"Generate input text for code completion with dynamic context.\"\"\"\n    context_mode = get_dynamic_context_mode(doc, 'code_completion')\n    context_config = {'enable_context': context_mode != 'none', 'context_mode': context_mode}\n    context = format_context(doc, context_config)\n    \n    if context_mode == 'none' or context == \"No specific requirements\":\n        prompt = f\"\"\"Complete the following Python code snippet:\n\n```python\n{doc[\"incomplete_code\"]}\n```\n\nComplete the missing parts to make the code functional:\"\"\"\n    else:\n        prompt = f\"\"\"Context: {context}\n\nComplete the following Python code snippet:\n\n```python\n{doc[\"incomplete_code\"]}\n```\n\nComplete the missing parts to make the code functional:\"\"\"\n    \n    debug_log_problem(doc, prompt, f\"code_completion_{context_mode}\")\n    return prompt\n",
+      "doc_to_target": "def doc_to_target(doc):\n    \"\"\"Generate target text for code completion.\"\"\"\n    return doc[\"expected_completion\"]\n",
+      "unsafe_code": false,
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "exact_match",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def bleu_score(gold_and_result: List) -> Dict[str, float]:\n    \"\"\"Calculate BLEU score for code/text generation.\"\"\"\n    try:\n        if len(gold_and_result) == 2:\n            references, predictions = gold_and_result\n        else:\n            return {\"bleu\": 0.0}\n            \n        # Handle both single strings and lists of strings\n        if isinstance(predictions, str):\n            predictions = [predictions]\n        if isinstance(references, str):\n            references = [references]\n            \n        result = bleu_metric.compute(\n            predictions=predictions,\n            references=[[ref] for ref in references]\n        )\n        return {\"bleu\": result[\"bleu\"]}\n    except Exception as e:\n        print(f\"BLEU calculation error: {e}\")\n        return {\"bleu\": 0.0}\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def context_adherence_score(gold_and_result: List) -> Dict[str, float]:\n    \"\"\"Calculate how well predictions adhere to context requirements.\"\"\"\n    total_score = 0.0\n    scored_predictions = 0\n    \n    # Extract references and predictions from the input\n    if len(gold_and_result) == 2:\n        references, predictions = gold_and_result\n    else:\n        return {\"context_adherence_score\": 0.0}\n    \n    # Handle both single strings and lists of strings\n    if isinstance(predictions, str):\n        predictions = [predictions]\n    if isinstance(references, str):\n        references = [references]\n    \n    for pred in predictions:\n        if not pred:\n            continue\n            \n        # For context adherence, we don't need the reference, just the prediction\n        # We'll use a simple heuristic based on common patterns\n        score = 0.0\n        max_score = 5.0\n        \n        # Check for descriptive variable names (not single letters)\n        if len([name for name in re.findall(r'\\b[a-z_][a-z0-9_]*\\b', pred) if len(name) > 2]) > 0:\n            score += 1.0\n        \n        # Check for type hints\n        if '->' in pred or ': ' in pred:\n            score += 1.0\n        \n        # Check for docstrings\n        if '\"\"\"' in pred or \"'''\" in pred:\n            score += 1.0\n        \n        # Check line length (approximate)\n        lines = pred.split('\\n')\n        if all(len(line) <= 80 for line in lines):\n            score += 1.0\n        \n        # Check for proper function structure\n        if 'def ' in pred and 'return' in pred:\n            score += 1.0\n        \n        total_score += score / max_score\n        scored_predictions += 1\n    \n    return {\"context_adherence_score\": total_score / scored_predictions if scored_predictions > 0 else 0.0}\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def style_compliance_score(gold_and_result: List) -> Dict[str, float]:\n    \"\"\"Calculate compliance with Python style guidelines.\"\"\"\n    total_score = 0.0\n    \n    # Extract references and predictions from the input\n    if len(gold_and_result) == 2:\n        references, predictions = gold_and_result\n    else:\n        return {\"style_compliance_score\": 0.0}\n    \n    # Handle both single strings and lists of strings\n    if isinstance(predictions, str):\n        predictions = [predictions]\n    if isinstance(references, str):\n        references = [references]\n    \n    for pred in predictions:\n        if not pred:\n            continue\n            \n        score = 0.0\n        max_score = 6.0\n        \n        # Check for proper indentation (4 spaces)\n        lines = pred.split('\\n')\n        proper_indent = True\n        for line in lines:\n            if line.strip() and line.startswith(' '):\n                leading_spaces = len(line) - len(line.lstrip(' '))\n                if leading_spaces % 4 != 0:\n                    proper_indent = False\n                    break\n        if proper_indent:\n            score += 1.0\n        \n        # Check for descriptive names (>2 characters)\n        names = re.findall(r'\\b[a-z_][a-z0-9_]*\\b', pred)\n        descriptive_names = [name for name in names if len(name) > 2]\n        if len(descriptive_names) >= len(names) * 0.8:  # 80% of names are descriptive\n            score += 1.0\n        \n        # Check for docstrings\n        if '\"\"\"' in pred or \"'''\" in pred:\n            score += 1.0\n        \n        # Check for type hints\n        if '->' in pred or ': ' in pred:\n            score += 1.0\n        \n        # Check line length\n        if all(len(line) <= 80 for line in lines):\n            score += 1.0\n        \n        # Check for proper spacing around operators\n        if re.search(r'\\w\\s*[+\\-*/=]\\s*\\w', pred):\n            score += 1.0\n        \n        total_score += score / max_score\n    \n    return {\"style_compliance_score\": total_score / len(predictions) if predictions else 0.0}\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def security_compliance_score(gold_and_result: List) -> Dict[str, float]:\n    \"\"\"Calculate compliance with security best practices.\"\"\"\n    total_score = 0.0\n    \n    # Extract references and predictions from the input\n    if len(gold_and_result) == 2:\n        references, predictions = gold_and_result\n    else:\n        return {\"security_compliance_score\": 0.0}\n    \n    # Handle both single strings and lists of strings\n    if isinstance(predictions, str):\n        predictions = [predictions]\n    if isinstance(references, str):\n        references = [references]\n    \n    for pred in predictions:\n        if not pred:\n            continue\n            \n        score = 0.0\n        max_score = 4.0\n        \n        # Check for input validation\n        if any(keyword in pred.lower() for keyword in ['validate', 'check', 'verify', 'isinstance', 'assert']):\n            score += 1.0\n        \n        # Check for error handling\n        if any(keyword in pred for keyword in ['try:', 'except', 'raise', 'ValueError', 'TypeError']):\n            score += 1.0\n        \n        # Check no hardcoded credentials\n        hardcoded_secrets = re.search(r'(password|secret|key|token|api_key)\\s*=\\s*[\"\\'][^\"\\']+[\"\\']', pred, re.IGNORECASE)\n        if not hardcoded_secrets:\n            score += 1.0\n        \n        # Check for safe practices (no eval, exec, etc.)\n        unsafe_functions = re.search(r'\\b(eval|exec|compile)\\s*\\(', pred)\n        if not unsafe_functions:\n            score += 1.0\n        \n        total_score += score / max_score\n    \n    return {\"security_compliance_score\": total_score / len(predictions) if predictions else 0.0}\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def performance_awareness_score(gold_and_result: List) -> Dict[str, float]:\n    \"\"\"Calculate awareness of performance best practices.\"\"\"\n    total_score = 0.0\n    \n    # Extract references and predictions from the input\n    if len(gold_and_result) == 2:\n        references, predictions = gold_and_result\n    else:\n        return {\"performance_awareness_score\": 0.0}\n    \n    # Handle both single strings and lists of strings\n    if isinstance(predictions, str):\n        predictions = [predictions]\n    if isinstance(references, str):\n        references = [references]\n    \n    for pred in predictions:\n        if not pred:\n            continue\n            \n        score = 0.0\n        max_score = 4.0\n        \n        # Check for list comprehensions instead of loops\n        has_comprehension = bool(re.search(r'\\[.*for.*in.*\\]', pred))\n        has_simple_loop = bool(re.search(r'for.*:\\s*\\n.*append', pred, re.MULTILINE))\n        if has_comprehension or not has_simple_loop:\n            score += 1.0\n        \n        # Check for generator expressions\n        if re.search(r'\\(.*for.*in.*\\)', pred):\n            score += 1.0\n        \n        # Check for avoiding nested loops\n        nested_loops = len(re.findall(r'for.*:\\s*\\n.*for.*:', pred, re.MULTILINE))\n        if nested_loops == 0:\n            score += 1.0\n        \n        # Check for efficient operations (using built-ins)\n        efficient_ops = any(func in pred for func in ['sum(', 'max(', 'min(', 'any(', 'all(', 'enumerate(', 'zip('])\n        if efficient_ops:\n            score += 1.0\n        \n        total_score += score / max_score\n    \n    return {\"performance_awareness_score\": total_score / len(predictions) if predictions else 0.0}\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "temperature": 0.0,
+        "max_gen_toks": 256,
+        "until": [],
+        "do_sample": false
+      },
+      "repeats": 1,
+      "filter_list": [
+        {
+          "name": "extract_code",
+          "filter": [
+            {
+              "function": "custom",
+              "filter_fn": "<function build_predictions_with_debug at 0x0000023247BAB2E0>"
+            }
+          ]
+        }
+      ],
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 1.0,
+        "model": "claude-3-5-haiku-20241022"
+      }
+    }
+  },
+  "versions": {
+    "python_code_completion": 1.0
+  },
+  "n-shot": {
+    "python_code_completion": 0
+  },
+  "higher_is_better": {
+    "python_code_completion": {
+      "exact_match": true,
+      "bleu_score": true,
+      "context_adherence_score": true,
+      "style_compliance_score": true,
+      "security_compliance_score": true,
+      "performance_awareness_score": true
+    }
+  },
+  "n-samples": {
+    "python_code_completion": {
+      "original": 3,
+      "effective": 1
+    }
+  },
+  "config": {
+    "model": "anthropic-chat",
+    "model_args": "model=claude-3-5-haiku-20241022",
+    "batch_size": "1",
+    "batch_sizes": [],
+    "device": null,
+    "use_cache": null,
+    "limit": 1.0,
+    "bootstrap_iters": 100000,
+    "gen_kwargs": null,
+    "random_seed": 0,
+    "numpy_seed": 1234,
+    "torch_seed": 1234,
+    "fewshot_seed": 1234
+  },
+  "git_hash": "b63af616",
+  "date": 1758609325.0794501,
+  "pretty_env_info": "PyTorch version: 2.8.0+cpu\nIs debug build: False\nCUDA used to build PyTorch: None\nROCM used to build PyTorch: N/A\n\nOS: Microsoft Windows 11 Pro (10.0.26100 64-bit)\nGCC version: Could not collect\nClang version: Could not collect\nCMake version: Could not collect\nLibc version: N/A\n\nPython version: 3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)] (64-bit runtime)\nPython platform: Windows-11-10.0.26100-SP0\nIs CUDA available: False\nCUDA runtime version: No CUDA\nCUDA_MODULE_LOADING set to: N/A\nGPU models and configuration: No CUDA\nNvidia driver version: No CUDA\ncuDNN version: No CUDA\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nName: 11th Gen Intel(R) Core(TM) i5-1130G7 @ 1.10GHz\nManufacturer: GenuineIntel\nFamily: 205\nArchitecture: 9\nProcessorType: 3\nDeviceID: CPU0\nCurrentClockSpeed: 1103\nMaxClockSpeed: 1805\nL2CacheSize: 5120\nL2CacheSpeed: None\nRevision: None\n\nVersions of relevant libraries:\n[pip3] numpy==2.3.3\n[pip3] torch==2.8.0\n[conda] Could not collect",
+  "transformers_version": "4.56.2",
+  "lm_eval_version": "0.4.9.1",
+  "upper_git_hash": null,
+  "task_hashes": {
+    "python_code_completion": "5e0acb6f492bc13cd33913805bb2941c028a7413049a45f2a2149ebd758e11a3"
+  },
+  "model_source": "anthropic-chat",
+  "model_name": "claude-3-5-haiku-20241022",
+  "model_name_sanitized": "claude-3-5-haiku-20241022",
+  "system_instruction": null,
+  "system_instruction_sha": null,
+  "fewshot_as_multiturn": false,
+  "chat_template": null,
+  "chat_template_sha": null,
+  "start_time": 661946.570795,
+  "end_time": 662037.409845,
+  "total_evaluation_time_seconds": "90.8390500000678"
+}
