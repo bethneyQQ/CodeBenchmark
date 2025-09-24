@@ -3,6 +3,8 @@ from . import (
     api_models,
     claude_local,
     claude_code_local,
+    dashscope_model,
+    deepseek_model,
     dummy,
     gguf,
     hf_audiolm,

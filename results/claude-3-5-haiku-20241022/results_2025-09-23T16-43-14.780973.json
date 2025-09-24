@@ -1,0 +1,220 @@
+{
+  "results": {
+    "multi_turn_generic_evaluation": {
+      "alias": "multi_turn_generic_evaluation",
+      "overall_multi_turn_score,multi_turn_responses": 1.0,
+      "overall_multi_turn_score_stderr,multi_turn_responses": "N/A",
+      "phase_completion_score,multi_turn_responses": 1.0,
+      "phase_completion_score_stderr,multi_turn_responses": "N/A",
+      "integrated_prd_completeness_score,multi_turn_responses": 1.0,
+      "integrated_prd_completeness_score_stderr,multi_turn_responses": "N/A",
+      "integrated_prd_clarity_score,multi_turn_responses": 1.0,
+      "integrated_prd_clarity_score_stderr,multi_turn_responses": "N/A",
+      "integrated_design_coherence_score,multi_turn_responses": 1.0,
+      "integrated_design_coherence_score_stderr,multi_turn_responses": "N/A",
+      "integrated_design_feasibility_score,multi_turn_responses": 1.0,
+      "integrated_design_feasibility_score_stderr,multi_turn_responses": "N/A",
+      "integrated_code_functionality_score,multi_turn_responses": 1.0,
+      "integrated_code_functionality_score_stderr,multi_turn_responses": "N/A",
+      "integrated_code_structure_score,multi_turn_responses": 1.0,
+      "integrated_code_structure_score_stderr,multi_turn_responses": "N/A",
+      "integrated_code_test_coverage_score,multi_turn_responses": 1.0,
+      "integrated_code_test_coverage_score_stderr,multi_turn_responses": "N/A",
+      "integrated_phase_consistency_score,multi_turn_responses": 1.0,
+      "integrated_phase_consistency_score_stderr,multi_turn_responses": "N/A",
+      "integrated_information_flow_score,multi_turn_responses": 1.0,
+      "integrated_information_flow_score_stderr,multi_turn_responses": "N/A"
+    }
+  },
+  "group_subtasks": {
+    "multi_turn_generic_evaluation": []
+  },
+  "configs": {
+    "multi_turn_generic_evaluation": {
+      "task": "multi_turn_generic_evaluation",
+      "tag": [
+        "multi_turn",
+        "generic",
+        "software_engineering",
+        "phase_based_evaluation"
+      ],
+      "custom_dataset": "def load_dataset(**kwargs):\n    \"\"\"Load the multi-turn generic dataset.\"\"\"\n    current_dir = os.path.dirname(__file__)\n    dataset_path = os.path.join(current_dir, \"problems.jsonl\")\n    \n    # Create sample problems if file doesn't exist\n    if not os.path.exists(dataset_path):\n        create_sample_problems(dataset_path)\n    \n    with open(dataset_path, 'r', encoding='utf-8') as f:\n        data = []\n        for line in f:\n            data.append(json.loads(line.strip()))\n    \n    # Check for difficulty filter in metadata\n    difficulty_filter = None\n    if 'metadata' in kwargs:\n        metadata = kwargs['metadata']\n        if isinstance(metadata, dict) and 'difficulty_filter' in metadata:\n            difficulty_filter = metadata['difficulty_filter']\n    \n    # Process data for lm-eval format\n    processed_data = []\n    for item in data:\n        # Apply difficulty filter if specified\n        if difficulty_filter and item.get('complexity') != difficulty_filter:\n            continue\n            \n        doc = {\n            'problem_id': item['problem_id'],\n            'complexity': item.get('difficulty', 'intermediate'),\n            'domain': item.get('category', 'general'),\n            'problem_description': item['description'],\n            'expected_outputs': item.get('expected_components', []),\n            'evaluation_criteria': item.get('evaluation_criteria', {}),\n            'phase_dependencies': item.get('phase_dependencies', {}),\n            'business_context': item.get('business_context', ''),\n            'title': item.get('title', '')\n        }\n        processed_data.append(doc)\n    \n    dataset = Dataset.from_list(processed_data)\n    return {\"test\": dataset}\n",
+      "test_split": "test",
+      "process_docs": "def process_docs(dataset):\n    \"\"\"Process the dataset to match the expected format.\"\"\"\n    return dataset\n",
+      "doc_to_text": "def format_multi_turn_prompt(doc):\n    \"\"\"Format the prompt for multi-turn evaluation.\"\"\"\n    \n    # Create a comprehensive prompt that includes all phases\n    # This will be used by the lm-eval framework as a single generation task\n    \n    full_prompt = f\"\"\"# Multi-Turn Software Engineering Evaluation\n\n**Problem Description:**\n{doc['problem_description']}\n\nYou will complete this software engineering project in 3 sequential phases. Please complete ALL phases in a single response, with clear phase separators.\n\n---\n\n## Phase 1: Product Requirements Document (PRD) Generation\n\n**Task:** Create a comprehensive Product Requirements Document (PRD) that includes:\n\n1. **Problem Statement**: Clear definition of the problem to solve\n2. **Objectives**: Main goals and success criteria  \n3. **User Stories**: Key user scenarios and requirements\n4. **Functional Requirements**: Core features and capabilities\n5. **Non-functional Requirements**: Performance, security, scalability constraints\n6. **Success Metrics**: Measurable criteria for evaluation\n\n**Output Format:**\n```\nPRD_START\n## Problem Statement\n[Your problem statement here]\n\n## Objectives  \n[Your objectives here]\n\n## User Stories\n[Your user stories here]\n\n## Functional Requirements\n[Your functional requirements here]\n\n## Non-functional Requirements  \n[Your non-functional requirements here]\n\n## Success Metrics\n[Your success metrics here]\nPRD_END\n```\n\n---\n\n## Phase 2: Technical Design\n\n**Task:** Based on your PRD above, create a detailed technical design that includes:\n\n1. **System Architecture**: High-level system components and their relationships\n2. **API Design**: Key endpoints, request/response formats\n3. **Data Models**: Database schema and data structures  \n4. **Technology Stack**: Recommended technologies and frameworks\n5. **Security Considerations**: Authentication, authorization, data protection\n6. **Scalability Plan**: How to handle growth and performance\n\n**Output Format:**\n```\nDESIGN_START\n## System Architecture\n[Your architecture design here]\n\n## API Design\n[Your API specifications here]\n\n## Data Models\n[Your data models here]\n\n## Technology Stack\n[Your technology choices here]\n\n## Security Considerations\n[Your security approach here]\n\n## Scalability Plan  \n[Your scalability strategy here]\nDESIGN_END\n```\n\n---\n\n## Phase 3: Implementation\n\n**Task:** Based on your PRD and Technical Design above, implement a complete Python solution that includes:\n\n1. **Core Implementation**: Main classes, functions, and logic\n2. **API/Interface Layer**: If applicable, API endpoints or CLI interface\n3. **Data Layer**: Database models, data access patterns\n4. **Configuration**: Settings, environment variables\n5. **Error Handling**: Comprehensive error management\n6. **Unit Tests**: Test cases for core functionality\n7. **Documentation**: Code comments and usage examples\n\n**Output Format:**\n```\nIMPLEMENTATION_START\n## Core Implementation\n```python\n# Main application code here\n```\n\n## API/Interface Layer  \n```python\n# API or interface code here\n```\n\n## Data Layer\n```python\n# Data models and access code here  \n```\n\n## Configuration\n```python\n# Configuration code here\n```\n\n## Unit Tests\n```python\n# Test cases here\n```\n\n## Documentation\n[Usage examples and documentation here]\nIMPLEMENTATION_END\n```\n\n---\n\n**Instructions:**\n- Complete ALL three phases in sequence\n- Each phase should build upon the previous ones\n- Be specific, actionable, and comprehensive\n- Include proper formatting with the specified markers\n- Focus on practical, implementable solutions\n\nPlease complete all phases now:\"\"\"\n\n    return full_prompt\n",
+      "doc_to_target": "{{expected_outputs}}",
+      "unsafe_code": false,
+      "description": "",
+      "target_delimiter": " ",
+      "fewshot_delimiter": "\n\n",
+      "num_fewshot": 0,
+      "metric_list": [
+        {
+          "metric": "def overall_multi_turn_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Calculate overall multi-turn score combining all metrics.\"\"\"\n    scores = []\n    \n    # Get all individual metric scores\n    prd_completeness = integrated_prd_completeness_score(predictions, references)\n    prd_clarity = integrated_prd_clarity_score(predictions, references)\n    design_coherence = integrated_design_coherence_score(predictions, references)\n    design_feasibility = integrated_design_feasibility_score(predictions, references)\n    code_functionality = integrated_code_functionality_score(predictions, references)\n    code_structure = integrated_code_structure_score(predictions, references)\n    code_tests = integrated_code_test_coverage_score(predictions, references)\n    phase_consistency = integrated_phase_consistency_score(predictions, references)\n    information_flow = integrated_information_flow_score(predictions, references)\n    phase_completion = phase_completion_score(predictions, references)\n    \n    # Combine with weights\n    weights = {\n        'prd_completeness': 0.12,\n        'prd_clarity': 0.08, \n        'design_coherence': 0.12,\n        'design_feasibility': 0.08,\n        'code_functionality': 0.20,  # Highest weight for working code\n        'code_structure': 0.12,\n        'code_tests': 0.08,\n        'phase_consistency': 0.10,\n        'information_flow': 0.05,\n        'phase_completion': 0.05\n    }\n    \n    for i in range(len(predictions)):\n        overall_score = (\n            prd_completeness[i] * weights['prd_completeness'] +\n            prd_clarity[i] * weights['prd_clarity'] +\n            design_coherence[i] * weights['design_coherence'] +\n            design_feasibility[i] * weights['design_feasibility'] +\n            code_functionality[i] * weights['code_functionality'] +\n            code_structure[i] * weights['code_structure'] +\n            code_tests[i] * weights['code_tests'] +\n            phase_consistency[i] * weights['phase_consistency'] +\n            information_flow[i] * weights['information_flow'] +\n            phase_completion[i] * weights['phase_completion']\n        )\n        \n        scores.append(overall_score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def phase_completion_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Score based on how many phases were completed.\"\"\"\n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        \n        expected_phases = ['prd', 'design', 'implementation']\n        completed_phases = sum(1 for phase in expected_phases if phase in phases and phases[phase].strip())\n        \n        completion_score = completed_phases / len(expected_phases)\n        scores.append(completion_score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_prd_completeness_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Extract PRD phase and evaluate completeness.\"\"\"\n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        prd_content = phases.get('prd', '')\n        \n        if prd_content:\n            score = prd_completeness_score([prd_content], [\"\"])[0]\n        else:\n            score = 0.0\n            \n        scores.append(score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_prd_clarity_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Extract PRD phase and evaluate clarity.\"\"\"\n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        prd_content = phases.get('prd', '')\n        \n        if prd_content:\n            score = prd_clarity_score([prd_content], [\"\"])[0]\n        else:\n            score = 0.0\n            \n        scores.append(score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_design_coherence_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Extract design phase and evaluate coherence.\"\"\" \n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        design_content = phases.get('design', '')\n        \n        if design_content:\n            score = design_coherence_score([design_content], [\"\"])[0]\n        else:\n            score = 0.0\n            \n        scores.append(score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_design_feasibility_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Extract design phase and evaluate feasibility.\"\"\"\n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        design_content = phases.get('design', '')\n        \n        if design_content:\n            score = design_feasibility_score([design_content], [\"\"])[0]\n        else:\n            score = 0.0\n            \n        scores.append(score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_code_functionality_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Extract implementation phase and evaluate functionality.\"\"\"\n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        impl_content = phases.get('implementation', '')\n        \n        if impl_content:\n            score = code_functionality_score([impl_content], [\"\"])[0]\n        else:\n            score = 0.0\n            \n        scores.append(score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_code_structure_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Extract implementation phase and evaluate structure.\"\"\"\n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        impl_content = phases.get('implementation', '')\n        \n        if impl_content:\n            score = code_structure_score([impl_content], [\"\"])[0]\n        else:\n            score = 0.0\n            \n        scores.append(score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_code_test_coverage_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Extract implementation phase and evaluate test coverage.\"\"\"\n    scores = []\n    \n    for pred in predictions:\n        phases = extract_phase_responses_single(pred)\n        impl_content = phases.get('implementation', '')\n        \n        if impl_content:\n            score = code_test_coverage_score([impl_content], [\"\"])[0]\n        else:\n            score = 0.0\n            \n        scores.append(score)\n    \n    return scores\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_phase_consistency_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Evaluate consistency across all phases.\"\"\"\n    return phase_consistency_score(predictions, references)\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        },
+        {
+          "metric": "def integrated_information_flow_score(predictions: List[str], references: List[str]) -> List[float]:\n    \"\"\"Evaluate information flow between phases.\"\"\"\n    return information_flow_score(predictions, references)\n",
+          "aggregation": "mean",
+          "higher_is_better": true
+        }
+      ],
+      "output_type": "generate_until",
+      "generation_kwargs": {
+        "temperature": 0.0,
+        "max_gen_toks": 2000,
+        "until": [],
+        "do_sample": false
+      },
+      "repeats": 1,
+      "filter_list": [
+        {
+          "name": "multi_turn_responses",
+          "filter": [
+            {
+              "function": "custom",
+              "filter_fn": "<function extract_phase_responses at 0x000001D904FF4400>"
+            }
+          ]
+        }
+      ],
+      "should_decontaminate": false,
+      "metadata": {
+        "version": 2.0,
+        "description": "Generic multi-turn evaluation supporting any model backend",
+        "supported_models": [
+          "all"
+        ],
+        "phases": [
+          {
+            "name": "prd_generation",
+            "description": "Product Requirements Document creation",
+            "input_context": "problem_description",
+            "output_format": "structured_prd"
+          },
+          {
+            "name": "technical_design",
+            "description": "Technical design based on PRD",
+            "input_context": "problem_description + prd_output",
+            "output_format": "design_document"
+          },
+          {
+            "name": "implementation",
+            "description": "Code implementation based on design",
+            "input_context": "problem_description + prd_output + design_output",
+            "output_format": "python_code"
+          }
+        ],
+        "model": "claude-3-5-haiku-20241022"
+      }
+    }
+  },
+  "versions": {
+    "multi_turn_generic_evaluation": 2.0
+  },
+  "n-shot": {
+    "multi_turn_generic_evaluation": 0
+  },
+  "higher_is_better": {
+    "multi_turn_generic_evaluation": {
+      "overall_multi_turn_score": true,
+      "phase_completion_score": true,
+      "integrated_prd_completeness_score": true,
+      "integrated_prd_clarity_score": true,
+      "integrated_design_coherence_score": true,
+      "integrated_design_feasibility_score": true,
+      "integrated_code_functionality_score": true,
+      "integrated_code_structure_score": true,
+      "integrated_code_test_coverage_score": true,
+      "integrated_phase_consistency_score": true,
+      "integrated_information_flow_score": true
+    }
+  },
+  "n-samples": {
+    "multi_turn_generic_evaluation": {
+      "original": 5,
+      "effective": 1
+    }
+  },
+  "config": {
+    "model": "claude-local",
+    "model_args": "model=claude-3-5-haiku-20241022",
+    "batch_size": 1,
+    "batch_sizes": [],
+    "device": null,
+    "use_cache": null,
+    "limit": 1.0,
+    "bootstrap_iters": 100000,
+    "gen_kwargs": null,
+    "random_seed": 0,
+    "numpy_seed": 1234,
+    "torch_seed": 1234,
+    "fewshot_seed": 1234
+  },
+  "git_hash": "d9a0d768",
+  "date": 1758670962.5738811,
+  "pretty_env_info": "PyTorch version: 2.8.0+cpu\nIs debug build: False\nCUDA used to build PyTorch: None\nROCM used to build PyTorch: N/A\n\nOS: Microsoft Windows 11 Pro (10.0.26100 64-bit)\nGCC version: Could not collect\nClang version: Could not collect\nCMake version: Could not collect\nLibc version: N/A\n\nPython version: 3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)] (64-bit runtime)\nPython platform: Windows-11-10.0.26100-SP0\nIs CUDA available: False\nCUDA runtime version: No CUDA\nCUDA_MODULE_LOADING set to: N/A\nGPU models and configuration: No CUDA\nNvidia driver version: No CUDA\ncuDNN version: No CUDA\nHIP runtime version: N/A\nMIOpen runtime version: N/A\nIs XNNPACK available: True\n\nCPU:\nName: 11th Gen Intel(R) Core(TM) i5-1130G7 @ 1.10GHz\nManufacturer: GenuineIntel\nFamily: 205\nArchitecture: 9\nProcessorType: 3\nDeviceID: CPU0\nCurrentClockSpeed: 1103\nMaxClockSpeed: 1805\nL2CacheSize: 5120\nL2CacheSpeed: None\nRevision: None\n\nVersions of relevant libraries:\n[pip3] numpy==2.3.3\n[pip3] torch==2.8.0\n[conda] Could not collect",
+  "transformers_version": "4.56.2",
+  "lm_eval_version": "0.4.9.1",
+  "upper_git_hash": null,
+  "task_hashes": {
+    "multi_turn_generic_evaluation": "d58d38834b99c962351611d89277aaed27408d839471ce03cde71ce6c2daf3d2"
+  },
+  "model_source": "claude-local",
+  "model_name": "claude-3-5-haiku-20241022",
+  "model_name_sanitized": "claude-3-5-haiku-20241022",
+  "system_instruction": null,
+  "system_instruction_sha": null,
+  "fewshot_as_multiturn": false,
+  "chat_template": null,
+  "chat_template_sha": null,
+  "start_time": 723592.568237,
+  "end_time": 723631.6816792,
+  "total_evaluation_time_seconds": "39.11344220000319"
+}

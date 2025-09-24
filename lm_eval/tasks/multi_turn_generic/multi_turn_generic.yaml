@@ -1,0 +1,95 @@
+task: multi_turn_generic_evaluation
+custom_dataset: !function utils.load_dataset
+process_docs: !function utils.process_docs
+output_type: generate_until
+test_split: test
+num_fewshot: 0
+
+doc_to_text: !function utils.format_multi_turn_prompt
+
+generation_kwargs:
+  temperature: 0.0
+  max_gen_toks: 2000
+  until: []
+  do_sample: false
+
+doc_to_target: "{{expected_outputs}}"
+
+metric_list:
+  # Overall Multi-turn Score (Primary Metric)
+  - metric: !function integrated_metrics.overall_multi_turn_score
+    aggregation: mean
+    higher_is_better: true
+  
+  # Phase Completion Score
+  - metric: !function integrated_metrics.phase_completion_score
+    aggregation: mean
+    higher_is_better: true
+    
+  # Phase 1: PRD Generation Metrics
+  - metric: !function integrated_metrics.integrated_prd_completeness_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function integrated_metrics.integrated_prd_clarity_score
+    aggregation: mean
+    higher_is_better: true
+  
+  # Phase 2: Design Quality Metrics
+  - metric: !function integrated_metrics.integrated_design_coherence_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function integrated_metrics.integrated_design_feasibility_score
+    aggregation: mean
+    higher_is_better: true
+  
+  # Phase 3: Implementation Quality Metrics
+  - metric: !function integrated_metrics.integrated_code_functionality_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function integrated_metrics.integrated_code_structure_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function integrated_metrics.integrated_code_test_coverage_score
+    aggregation: mean
+    higher_is_better: true
+  
+  # Cross-phase Analysis Metrics
+  - metric: !function integrated_metrics.integrated_phase_consistency_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function integrated_metrics.integrated_information_flow_score
+    aggregation: mean
+    higher_is_better: true
+
+filter_list:
+  - name: "multi_turn_responses"
+    filter:
+      - function: "custom"
+        filter_fn: !function utils.extract_phase_responses
+
+repeats: 1
+tag:
+  - multi_turn
+  - generic
+  - software_engineering
+  - phase_based_evaluation
+
+metadata:
+  version: 2.0
+  description: "Generic multi-turn evaluation supporting any model backend"
+  supported_models: ["all"]
+  phases:
+    - name: "prd_generation"
+      description: "Product Requirements Document creation"
+      input_context: "problem_description"
+      output_format: "structured_prd"
+      
+    - name: "technical_design"  
+      description: "Technical design based on PRD"
+      input_context: "problem_description + prd_output"
+      output_format: "design_document"
+      
+    - name: "implementation"
+      description: "Code implementation based on design"
+      input_context: "problem_description + prd_output + design_output"
+      output_format: "python_code"

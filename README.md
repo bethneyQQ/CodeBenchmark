@@ -93,6 +93,15 @@ Your custom dataset can contain multiple task types in a single JSONL file. Each
 - `python_docstring_generation` - Generate documentation
 - `python_function_generation` - Generate complete functions
 
+## 🤖 **Supported Model Backends**
+
+- **Claude (Anthropic)**: `claude-local` - Direct API access
+- **Claude Code CLI**: `anthropic-chat` - CLI-based access  
+- **DashScope (Qwen)**: `dashscope` - Alibaba Cloud's Qwen models
+- **DeepSeek**: `deepseek` - DeepSeek's specialized coding models
+- **Local Models**: `local-chat-completions`, `local-completions` - LM Studio/OpenAI-compatible APIs
+- **Other Models**: Any model supported by lm-evaluation-harness
+
 ## 🚀 **Step 2: Run with Your Local Model**
 
 Run with your local Qwen model, managed by LM_Studio:
@@ -140,6 +149,20 @@ python -m lm_eval \
   --batch_size 1
 ```
 
+### Option B: DeepSeek - Specialized Code Model
+```bash
+export DEEPSEEK_API_KEY="your_key_here"
+
+python -m lm_eval \
+  --model deepseek \
+  --model_args model=deepseek-coder \
+  --tasks python_code_completion \
+  --output_path test_results/deepseek_test.json \
+  --log_samples \
+  --limit 2 \
+  --batch_size 1
+```
+
 ### Option B: Claude with Custom Dataset  
 ```bash
 export ANTHROPIC_API_KEY="your_key_here"
@@ -153,6 +176,19 @@ python -m lm_eval \
   --log_samples \
   --limit 2 \
   --batch_size 1
+```
+
+### Option C: DashScope (Qwen Models)
+```bash
+export DASHSCOPE_API_KEY="your_api_key_here"
+
+python -m lm_eval \
+  --model dashscope \
+  --model_args model=qwen-turbo \
+  --tasks python_code_completion \
+  --output_path test_results/dashscope_test.json \
+  --log_samples \
+  --limit 2
 ```
 
 ## 🔧 **Configurable Dataset Paths**
