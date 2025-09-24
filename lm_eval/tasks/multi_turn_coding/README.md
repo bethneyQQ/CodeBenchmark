@@ -1,4 +1,4 @@
-# Multi-Turn Coding Evaluation with Claude Code SDK
+# Multi-Turn Coding Evaluation with 🚀Claude Code SDK🚀
 
 A comprehensive evaluation framework for testing local models on multi-turn software engineering workflows using Claude Code SDK integration.
 
