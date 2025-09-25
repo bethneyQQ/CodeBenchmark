@@ -9,7 +9,7 @@ doc_to_text: !function utils.format_combined_prompt
 
 generation_kwargs:
   temperature: 0.0
-  max_gen_toks: 3000
+  max_gen_toks: 800  # Reduced for Claude Code SDK compatibility with Haiku
   until: []
   do_sample: false
 

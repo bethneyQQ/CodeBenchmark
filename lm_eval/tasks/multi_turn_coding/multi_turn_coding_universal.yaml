@@ -1,0 +1,82 @@
+task: multi_turn_coding_eval_universal
+custom_dataset: !function utils.load_dataset
+process_docs: !function utils.process_docs
+output_type: generate_until
+test_split: test
+num_fewshot: 0
+
+doc_to_text: !function utils.format_combined_prompt
+
+generation_kwargs:
+  temperature: 0.0
+  max_gen_toks: 2000  # Safe across all models, including Haiku variants
+  until: []
+  do_sample: false
+
+doc_to_target: "{{problem_description}}"
+
+metric_list:
+  - metric: !function custom_metrics.file_existence_check
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.prd_quality_from_file
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.design_coherence_from_file
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.code_execution_test
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.project_structure_validation
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.integration_test
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.architecture_quality_assessment
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.policy_utilization_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.policy_adherence_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.technical_constraint_adherence
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.performance_requirement_coverage
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.security_compliance_check
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function custom_metrics.execution_time_efficiency
+    aggregation: mean
+    higher_is_better: false
+  - metric: !function custom_metrics.token_cost_estimation
+    aggregation: mean
+    higher_is_better: false
+
+filter_list:
+  - name: "extract_responses"
+    filter:
+      - function: "custom"
+        filter_fn: !function utils.build_predictions
+
+repeats: 1
+metadata:
+  version: 2.0
+  description: "Universal multi-turn coding evaluation supporting multiple model backends"
+  author: "LM Evaluation Harness"
+  tags:
+    - multi_turn
+    - coding
+    - universal_models
+    - file_system
+    - software_engineering
+    - deepseek
+    - claude_code
+    - openai
+    - anthropic

@@ -1,6 +1,33 @@
-# Multi-Turn Coding Evaluation with 🚀Claude Code SDK🚀
+# Multi-Turn Coding Evaluation Framework 🚀
 
-A comprehensive evaluation framework for testing local models on multi-turn software engineering workflows using Claude Code SDK integration.
+A comprehensive evaluation framework for testing multiple model backends on multi-turn software engineering workflows.
+
+## 🆕 Universal Model Support (v2.0)
+
+This framework now supports multiple model backends with a unified interface:
+
+- **🤖 Claude Code SDK** - Enhanced coding with file system access
+- **⚡ DeepSeek Models** - Via Alibaba Cloud DashScope API  
+- **🧠 OpenAI Models** - GPT-3.5, GPT-4 series
+- **💬 Anthropic Claude** - Direct API integration
+- **🌐 DashScope Models** - Qwen and other Alibaba models
+- **🔧 Custom Models** - Easy to extend for new backends
+
+### Quick Model Selection Examples
+
+```bash
+# Claude Code (default, most capable for coding tasks)
+lm_eval --model claude-code-local --model_args model=claude-3-sonnet-20240229,multi_turn=true --tasks multi_turn_coding_eval_universal
+
+# DeepSeek (excellent for code generation)
+lm_eval --model deepseek --model_args model=deepseek-v3.1 --tasks multi_turn_coding_eval_deepseek
+
+# OpenAI GPT-4
+lm_eval --model openai-completions --model_args model=gpt-4 --tasks multi_turn_coding_eval_universal
+
+# Anthropic Claude  
+lm_eval --model anthropic_llms --model_args model=claude-3-haiku-20240307 --tasks multi_turn_coding_eval_universal
+```
 
 ## Overview
 
@@ -43,9 +70,19 @@ The model receives a single prompt describing all phases and must complete them 
 ### 🚀 Quick Start Checklist
 
 ```bash
-# 1. Check dependencies
+# 1. Choose your model backend and install dependencies
 cd lm_eval/tasks/multi_turn_coding
 python check_dependencies.py
+
+# For Claude Code SDK (recommended for coding tasks):
+pip install claude-code-sdk
+export ANTHROPIC_API_KEY="your-key"
+
+# For DeepSeek models:  
+export DASHSCOPE_API_KEY="your-key"
+
+# For OpenAI models:
+export OPENAI_API_KEY="your-key"
 
 # 2. Install missing packages
 pip install -r requirements.txt
