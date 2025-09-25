@@ -17,7 +17,8 @@ handle_error() {
 # trap 'handle_error $LINENO "$BASH_COMMAND"' ERR
 
 # Default values
-MODEL="claude-3-5-haiku-20241022"
+MODEL_BACKEND="claude-code"
+MODEL_NAME="claude-3-haiku-20240307"
 LIMIT=1
 OUTPUT_DIR="results/simple_test"
 DIFFICULTY=""
@@ -30,8 +31,21 @@ while [[ $# -gt 0 ]]; do
             DIFFICULTY="$2"
             shift 2
             ;;
+        --model-backend)
+            MODEL_BACKEND="$2"
+            shift 2
+            ;;
+        --model-name)
+            MODEL_NAME="$2"
+            shift 2
+            ;;
         --model)
-            MODEL="$2"
+            # Legacy support: --model can specify either backend or full model name
+            if [[ "$2" == *"claude-code"* ]] || [[ "$2" == *"deepseek"* ]] || [[ "$2" == *"openai"* ]] || [[ "$2" == *"anthropic"* ]]; then
+                MODEL_BACKEND="$2"
+            else
+                MODEL_NAME="$2"
+            fi
             shift 2
             ;;
         --limit)
@@ -46,20 +60,34 @@ while [[ $# -gt 0 ]]; do
             echo "Usage: $0 [OPTIONS]"
             echo ""
             echo "Options:"
-            echo "  --difficulty LEVEL    Problem difficulty: easy, simple, medium, complex (default: random)"
-            echo "  --model MODEL         Claude model to use (default: claude-3-haiku-20240307)"
-            echo "  --limit N             Number of problems to test (default: 1)"
-            echo "  --debug               Show detailed problem information before running"
-            echo "  --help, -h            Show this help message"
+            echo "  --difficulty LEVEL       Problem difficulty: easy, simple, medium, complex (default: random)"
+            echo "  --model-backend BACKEND  Model backend: claude-code, deepseek, openai, anthropic, universal (default: claude-code)"
+            echo "  --model-name NAME        Specific model name (default: claude-3-haiku-20240307)"
+            echo "  --model NAME             Legacy: model name or backend (deprecated, use --model-backend and --model-name)"
+            echo "  --limit N                Number of problems to test (default: 1)"
+            echo "  --debug                  Show detailed problem information before running"
+            echo "  --help, -h               Show this help message"
             echo ""
-            echo "Examples:"
-            echo "  $0                           # Test 1 random problem"
-            echo "  $0 --difficulty easy         # Test 1 easy problem"
-            echo "  $0 --difficulty simple       # Test 1 simple problem"
-            echo "  $0 --difficulty medium       # Test 1 medium problem"
-            echo "  $0 --difficulty complex      # Test 1 complex problem"
-            echo "  $0 --difficulty easy --limit 2    # Test 2 easy problems"
-            echo "  $0 --debug --difficulty simple     # Show problem details before testing"
+            echo "Model Backend Examples:"
+            echo "  claude-code    - Claude Code SDK (best for file operations)"
+            echo "  deepseek       - DeepSeek models (cost-effective, good for code)"
+            echo "  openai         - OpenAI GPT models (reliable, well-tested)"
+            echo "  anthropic      - Anthropic Claude API (reasoning-focused)"
+            echo "  universal      - Universal config (works with any model)"
+            echo ""
+            echo "Model Name Examples:"
+            echo "  Claude: claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229"
+            echo "  DeepSeek: deepseek-v3.1, deepseek-v3, deepseek-r1"
+            echo "  OpenAI: gpt-4-turbo, gpt-4, gpt-3.5-turbo"
+            echo ""
+            echo "Usage Examples:"
+            echo "  $0                                          # Claude Code with Haiku (default)"
+            echo "  $0 --difficulty easy                        # Test 1 easy problem with default model"
+            echo "  $0 --model-backend deepseek --model-name deepseek-v3.1    # Use DeepSeek"
+            echo "  $0 --model-backend openai --model-name gpt-4-turbo        # Use OpenAI GPT-4"
+            echo "  $0 --model-backend anthropic --model-name claude-3-sonnet-20240229  # Use Anthropic API"
+            echo "  $0 --difficulty medium --limit 2 --model-backend deepseek # Test 2 medium problems with DeepSeek"
+            echo "  $0 --debug --model-backend universal       # Debug mode with universal config"
             exit 0
             ;;
         *)
@@ -86,8 +114,45 @@ if [[ -n "$DIFFICULTY" ]]; then
     esac
 fi
 
+# Determine model configuration based on backend
+case $MODEL_BACKEND in
+    claude-code)
+        LM_EVAL_MODEL="claude-code-local"
+        LM_EVAL_TASK="multi_turn_coding_eval_claude_code"
+        MODEL_ARGS="model=$MODEL_NAME,multi_turn=true,debug=true,permission_mode=bypassPermissions"
+        ;;
+    deepseek)
+        LM_EVAL_MODEL="deepseek"
+        LM_EVAL_TASK="multi_turn_coding_eval_deepseek"
+        MODEL_ARGS="model=$MODEL_NAME"
+        ;;
+    openai)
+        LM_EVAL_MODEL="openai-completions"
+        LM_EVAL_TASK="multi_turn_coding_eval_openai"
+        MODEL_ARGS="model=$MODEL_NAME"
+        ;;
+    anthropic)
+        LM_EVAL_MODEL="anthropic_llms"
+        LM_EVAL_TASK="multi_turn_coding_eval_universal"
+        MODEL_ARGS="model=$MODEL_NAME"
+        ;;
+    universal)
+        LM_EVAL_MODEL="anthropic_llms"  # Default to anthropic for universal
+        LM_EVAL_TASK="multi_turn_coding_eval_universal"
+        MODEL_ARGS="model=$MODEL_NAME"
+        ;;
+    *)
+        echo "❌ Unsupported model backend: $MODEL_BACKEND"
+        echo "Supported backends: claude-code, deepseek, openai, anthropic, universal"
+        exit 1
+        ;;
+esac
+
 echo "🧪 Multi-Turn Coding Evaluation - Simple Test"
-echo "Model: $MODEL"
+echo "Model Backend: $MODEL_BACKEND"
+echo "Model Name: $MODEL_NAME"
+echo "LM-Eval Model: $LM_EVAL_MODEL"
+echo "Task: $LM_EVAL_TASK"
 echo "Problems: $LIMIT"
 if [[ -n "$DIFFICULTY" ]]; then
     echo "Difficulty: $DIFFICULTY"
@@ -237,13 +302,13 @@ run_lm_eval_with_timeout() {
 }
 
 if [[ -n "$METADATA_ARGS" ]]; then
-    CMD="lm_eval --model claude-code-local --model_args model=$MODEL,multi_turn=true,debug=true,permission_mode=bypassPermissions --tasks multi_turn_coding_eval_claude_code --output_path $OUTPUT_DIR/full_context_test.json --log_samples --limit $LIMIT --batch_size 1 $METADATA_ARGS"
+    CMD="lm_eval --model $LM_EVAL_MODEL --model_args $MODEL_ARGS --tasks $LM_EVAL_TASK --output_path $OUTPUT_DIR/full_context_test.json --log_samples --limit $LIMIT --batch_size 1 $METADATA_ARGS"
     run_lm_eval_with_timeout "$CMD" || {
         echo "❌ First lm_eval command failed or timed out"
         exit 1
     }
 else
-    CMD="lm_eval --model claude-code-local --model_args model=$MODEL,multi_turn=true,debug=true,permission_mode=bypassPermissions --tasks multi_turn_coding_eval_claude_code --output_path $OUTPUT_DIR/full_context_test.json --log_samples --limit $LIMIT --batch_size 1"
+    CMD="lm_eval --model $LM_EVAL_MODEL --model_args $MODEL_ARGS --tasks $LM_EVAL_TASK --output_path $OUTPUT_DIR/full_context_test.json --log_samples --limit $LIMIT --batch_size 1"
     run_lm_eval_with_timeout "$CMD" || {
         echo "❌ First lm_eval command failed or timed out"
         exit 1
@@ -298,13 +363,13 @@ fi
 echo "Starting lm_eval command..."
 
 if [[ -n "$METADATA_ARGS" ]]; then
-    CMD="lm_eval --model claude-code-local --model_args model=$MODEL,multi_turn=true,debug=true,permission_mode=bypassPermissions --tasks multi_turn_coding_eval_claude_code --output_path $OUTPUT_DIR/no_context_test.json --log_samples --limit $LIMIT --batch_size 1 $METADATA_ARGS"
+    CMD="lm_eval --model $LM_EVAL_MODEL --model_args $MODEL_ARGS --tasks $LM_EVAL_TASK --output_path $OUTPUT_DIR/no_context_test.json --log_samples --limit $LIMIT --batch_size 1 $METADATA_ARGS"
     run_lm_eval_with_timeout "$CMD" || {
         echo "❌ Second lm_eval command failed or timed out"
         exit 1
     }
 else
-    CMD="lm_eval --model claude-code-local --model_args model=$MODEL,multi_turn=true,debug=true,permission_mode=bypassPermissions --tasks multi_turn_coding_eval_claude_code --output_path $OUTPUT_DIR/no_context_test.json --log_samples --limit $LIMIT --batch_size 1"
+    CMD="lm_eval --model $LM_EVAL_MODEL --model_args $MODEL_ARGS --tasks $LM_EVAL_TASK --output_path $OUTPUT_DIR/no_context_test.json --log_samples --limit $LIMIT --batch_size 1"
     run_lm_eval_with_timeout "$CMD" || {
         echo "❌ Second lm_eval command failed or timed out"
         exit 1
@@ -372,7 +437,10 @@ echo "  python analyze_context_impact.py --results_dir $OUTPUT_DIR"
 if [[ "$DEBUG" == "true" ]]; then
     echo ""
     echo "🔍 Debug Summary:"
-    echo "  Model used: $MODEL"
+    echo "  Model backend: $MODEL_BACKEND"
+    echo "  Model name: $MODEL_NAME"
+    echo "  LM-Eval model: $LM_EVAL_MODEL"
+    echo "  Task: $LM_EVAL_TASK"
     echo "  Problems tested: $LIMIT"
     echo "  Difficulty filter: ${DIFFICULTY:-random}"
     echo "  Output directory: $OUTPUT_DIR"

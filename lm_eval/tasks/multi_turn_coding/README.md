@@ -40,6 +40,12 @@ This evaluation framework tests models through a complete software development l
 
 The model receives a single prompt describing all phases and must complete them sequentially, with file system interactions for each deliverable.
 
+### 🆕 New in v2.1: Enhanced Multi-Model Support
+- **Enhanced simple_test.sh** - Now supports 5 different model backends
+- **Cross-platform compatibility** - Added Windows PowerShell script (simple_test.ps1)
+- **Flexible model selection** - Easy switching between Claude Code, DeepSeek, OpenAI, Anthropic
+- **Comprehensive documentation** - Detailed usage guides and troubleshooting
+
 ### 🆕 New in v2.0: Easy Difficulty Level
 - **5 new beginner-friendly problems** designed for learning and onboarding
 - **Educational focus** with clear, simple requirements and expected outcomes
@@ -99,6 +105,85 @@ python setup_evaluation.py --all
 # 6. Analyze results
 python quick_results.py results/simple_test_easy
 ```
+
+## 🔄 Multi-Model Testing (Enhanced simple_test.sh)
+
+The `simple_test.sh` script now supports multiple model backends for easy comparison testing:
+
+### Supported Model Backends
+
+| Backend | Best For | Models Available |
+|---------|----------|------------------|
+| **claude-code** | File operations, coding tasks | claude-3-haiku-20240307, claude-3-sonnet-20240229, claude-3-opus-20240229 |
+| **deepseek** | Cost-effective code generation | deepseek-v3.1, deepseek-v3, deepseek-r1 |
+| **openai** | Stable, reliable performance | gpt-4-turbo, gpt-4, gpt-3.5-turbo |
+| **anthropic** | Strong reasoning capabilities | claude-3-opus-20240229, claude-3-sonnet-20240229, claude-3-haiku-20240307 |
+| **universal** | Generic compatibility | Any model with proper configuration |
+
+### Quick Multi-Model Examples
+
+```bash
+# Test with Claude Code SDK (default, recommended)
+./simple_test.sh --difficulty easy
+
+# Test with DeepSeek (cost-effective)
+./simple_test.sh --model-backend deepseek --model-name deepseek-v3.1 --difficulty easy
+
+# Test with OpenAI GPT-4 (reliable)
+./simple_test.sh --model-backend openai --model-name gpt-4-turbo --difficulty easy
+
+# Test with Anthropic Claude API (reasoning-focused)
+./simple_test.sh --model-backend anthropic --model-name claude-3-sonnet-20240229 --difficulty easy
+
+# Compare multiple models on same problem set
+./simple_test.sh --model-backend claude-code --difficulty medium --limit 2
+./simple_test.sh --model-backend deepseek --difficulty medium --limit 2
+./simple_test.sh --model-backend openai --difficulty medium --limit 2
+```
+
+### Windows PowerShell Support
+
+For Windows users, use `simple_test.ps1`:
+
+```powershell
+# Basic usage
+.\simple_test.ps1 -Difficulty easy
+
+# Test different models
+.\simple_test.ps1 -ModelBackend deepseek -ModelName deepseek-v3.1 -Difficulty easy
+.\simple_test.ps1 -ModelBackend openai -ModelName gpt-4-turbo -Difficulty easy
+```
+
+### Environment Setup by Backend
+
+```bash
+# Claude Code SDK & Anthropic
+export ANTHROPIC_API_KEY="your-anthropic-key"
+
+# DeepSeek
+export DASHSCOPE_API_KEY="your-dashscope-key"
+
+# OpenAI
+export OPENAI_API_KEY="your-openai-key"
+```
+
+### Performance Comparison Recommendations
+
+```bash
+# Cost-optimized testing
+./simple_test.sh --model-backend deepseek --model-name deepseek-v3.1 --limit 5
+
+# Quality-focused testing  
+./simple_test.sh --model-backend claude-code --model-name claude-3-sonnet-20240229 --limit 3
+
+# Stability testing
+./simple_test.sh --model-backend openai --model-name gpt-4-turbo --limit 10
+
+# Reasoning capability testing
+./simple_test.sh --model-backend anthropic --model-name claude-3-opus-20240229 --limit 2
+```
+
+For detailed multi-model usage instructions, see [MULTI_MODEL_USAGE.md](MULTI_MODEL_USAGE.md).
 
 ### 1. Prerequisites
 
@@ -552,6 +637,26 @@ export ENABLE_QUALITY_CONTEXT=true
     ├── multi_turn_results.json
     └── samples_multi_turn_coding_eval_claude_code.jsonl
 ```
+
+## Project Files
+
+### Testing Scripts
+- **`simple_test.sh`** - Multi-model testing script for Linux/macOS
+- **`simple_test.ps1`** - Multi-model testing script for Windows PowerShell
+- **`quick_results.py`** - Results analysis script
+- **`analyze_my_results.py`** - Custom results analysis script
+
+### Documentation
+- **`README.md`** - Main documentation (this file)
+- **`MULTI_MODEL_USAGE.md`** - Detailed multi-model usage guide
+- **`MODEL_CONFIGURATIONS.md`** - Model configuration reference
+- **`UNIVERSAL_MODELS_GUIDE.md`** - Universal model support guide
+
+### Configuration Files
+- **`multi_turn_coding.yaml`** - Claude Code SDK configuration
+- **`multi_turn_coding_deepseek.yaml`** - DeepSeek model configuration
+- **`multi_turn_coding_openai.yaml`** - OpenAI model configuration
+- **`multi_turn_coding_universal.yaml`** - Universal model configuration
 
 ## Domains and Complexity
 

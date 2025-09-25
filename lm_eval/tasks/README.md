@@ -8,196 +8,629 @@ provided to the individual README.md files for each subfolder.
 ## Recent Updates
 
 - **Multi-Turn Evaluation Framework**: Added comprehensive multi-turn evaluation systems including `multi_turn_generic` for three-phase iterative problem-solving and `multi_turn_scenarios` for flexible conversational evaluation across 8+ scenario types.
-- **Python Code Completion**: Introduced `python_code_completion` benchmark with multiple context modes, comprehensive scoring metrics, and evaluation of style compliance, security awareness, and performance considerations.
-- **DeepSeek Model Integration**: Added native support for DeepSeek models via Alibaba Cloud DashScope API. Use `--model deepseek --model_args model=deepseek-v3.1` to evaluate with DeepSeek models.
+- **Python Coding Suite**: Introduced comprehensive Python coding evaluation with 5 task categories, context-aware evaluation, and detailed analysis tools.
+- **Multi-Model Support**: Enhanced simple_test.sh with support for Claude Code, DeepSeek, OpenAI, Anthropic, and universal model backends.
 
 ## Available Tasks
 
-This repository contains the following evaluation tasks:
+This repository contains the following evaluation tasks (only tasks with actual implementations are listed):
 
-| Task Family                                                              | Description                                                                                                                                                                                                                                                                                                                            | Language(s)                                                                                                                   |
-|--------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------------|
-| [multi_turn_coding](multi_turn_coding/README.md)                         | Multi-turn coding evaluation tasks that test iterative programming problem-solving capabilities.                                                                                                                                                                                                                                      | Python                                                                                                                        |
-| [multi_turn_generic](multi_turn_generic/README.md)                       | Three-phase multi-turn evaluation system testing iterative problem-solving through Analysis → Design → Implementation phases with comprehensive scoring metrics.                                                                                                                                                                      | English                                                                                                                       |
-| [multi_turn_scenarios](multi_turn_scenarios/README.md)                   | Flexible multi-turn conversation evaluation framework supporting 8+ scenario types including code review, problem solving, teaching dialogue, and conversational scenarios with customizable chat templates.                                                                                                                            | English                                                                                                                       |
-| [python_coding](python_coding/README.md)                                 | Comprehensive Python coding evaluation tasks including code completion, debugging, optimization, and generation with multiple difficulty levels and context modes.                                                                                                                                                                    | Python                                                                                                                        |
-| [tinyBenchmarks](tinyBenchmarks/README.md)                               | Evaluation of large language models with fewer examples using tiny versions of popular benchmarks.                                                                                                                                                                                                                                     | English                                                                                                                       |
-| [arc](arc/README.md)                                                     | Tasks involving complex reasoning over a diverse set of questions.                                                                                                                                                                                                                                                                     | English                                                                                                                       |
-| [arithmetic](arithmetic/README.md)                                       | Tasks involving numerical computations and arithmetic reasoning.                                                                                                                                                                                                                                                                       | English                                                                                                                       |
-| [asdiv](asdiv/README.md)                                                 | Tasks involving arithmetic and mathematical reasoning challenges.                                                                                                                                                                                                                                                                      | English                                                                                                                       |
-| [babi](babi/README.md)                                                   | Tasks designed as question and answering challenges based on simulated stories.                                                                                                                                                                                                                                                        | English                                                                                                                       |
-| [babilong](babilong/README.md)                                           | Tasks designed to test whether models can find and reason over facts in long contexts.                                                                                                                                                                                                                                                 | English                                                                                                                       |
-| [basque_bench](basque_bench/README.md)                                   | Collection of tasks in Basque encompassing various evaluation areas.                                                                                                                                                                                                                                                                   | Basque                                                                                                                        |
-| [basqueglue](basqueglue/README.md)                                       | Tasks designed to evaluate language understanding in Basque language.                                                                                                                                                                                                                                                                  | Basque                                                                                                                        |
-| [bbh](bbh/README.md)                                                     | Tasks focused on deep semantic understanding through hypothesization and reasoning.                                                                                                                                                                                                                                                    | English, German                                                                                                               |
-| [bbq](bbq/README.md)                                                     | A question-answering benchmark designed to measure social biases in language models across various demographic categories and contexts.                                                                                                                                                                                                | English                                                                                                                       |
-| [belebele](belebele/README.md)                                           | Language understanding tasks in a variety of languages and scripts.                                                                                                                                                                                                                                                                    | Multiple (122 languages)                                                                                                      |
-| benchmarks                                                               | General benchmarking tasks that test a wide range of language understanding capabilities.                                                                                                                                                                                                                                              |                                                                                                                               |
-| [bertaqa](bertaqa/README.md)                                             | Local Basque cultural trivia QA tests in English and Basque languages.                                                                                                                                                                                                                                                                 | English, Basque, Basque (MT)                                                                                                  |
-| [bhs](bhs/README.md)                                                     | Grammatical knowledge evaluation for low-resource langauges.                                                                                                                                                                                                                                                                           | Basque, Hindi, Swahili                                                                                                        |
-| [bigbench](bigbench/README.md)                                           | Broad tasks from the BIG-bench benchmark designed to push the boundaries of large models.                                                                                                                                                                                                                                              | Multiple                                                                                                                      |
-| [blimp](blimp/README.md)                                                 | Tasks testing grammatical phenomena to evaluate language model's linguistic capabilities.                                                                                                                                                                                                                                              | English                                                                                                                       |
-| [blimp_nl](blimp_nl/README.md)                                           | A benchmark evaluating language models' grammatical capabilities in Dutch based on comparing the probabilities of minimal pairs of grammatical and ungrammatical sentences.                                                                                                                                                            | Dutch                                                                                                                         |
-| [c4](c4/README.md)                                                       | Tasks based on a colossal, cleaned version of Common Crawl's web crawl corpus to assess models' language modeling capabilities.                                                                                                                                                                                                        | English                                                                                                                       |
-| [cabbq](cabbq/README.md)                                                 | Adaptation of the [BBQ](bbq/README.md) benchmark to the Catalan language and stereotypes prevalent in Spain.                                                                                                                                                                                                                           | Catalan                                                                                                                       |
-| [careqa](careqa/README.md)                                               | Multiple choice and open-ended medical question answering based on the Spanish Specialised Healthcare Training (MIR) exams.                                                                                                                                                                                                            | English, Spanish                                                                                                              |
-| [catalan_bench](catalan_bench/README.md)                                 | Collection of tasks in Catalan encompassing various evaluation areas.                                                                                                                                                                                                                                                                  | Catalan                                                                                                                       |
-| [ceval](ceval/README.md)                                                 | Tasks that evaluate language understanding and reasoning in an educational context.                                                                                                                                                                                                                                                    | Chinese                                                                                                                       |
-| [cmmlu](cmmlu/README.md)                                                 | Multi-subject multiple choice question tasks for comprehensive academic assessment.                                                                                                                                                                                                                                                    | Chinese                                                                                                                       |
-| code_x_glue                                                              | Tasks that involve understanding and generating code across multiple programming languages.                                                                                                                                                                                                                                            | Go, Java, JS, PHP, Python, Ruby                                                                                               |
-| [commonsense_qa](commonsense_qa/README.md)                               | CommonsenseQA, a multiple-choice QA dataset for measuring commonsense knowledge.                                                                                                                                                                                                                                                       | English                                                                                                                       |
-| [copal_id](copal_id/README.md) United States                             | Indonesian causal commonsense reasoning dataset that captures local nuances.                                                                                                                                                                                                                                                           | Indonesian                                                                                                                    |
-| [coqa](coqa/README.md)                                                   | Conversational question answering tasks to test dialog understanding.                                                                                                                                                                                                                                                                  | English                                                                                                                       |
-| [crows_pairs](crows_pairs/README.md)                                     | Tasks designed to test model biases in various sociodemographic groups.                                                                                                                                                                                                                                                                | English, French                                                                                                               |
-| [click](click/README.md)                                                 | A benchmark dataset of Cultural and Linguistic Intelligence in Korean (CLIcK), comprising 1,995 QA pairs sourced from official Korean exams and textbooks to test Korean cultural and linguistic knowledge.                                                                                                                            | Korean                                                                                                                        |
-| csatqa                                                                   | Tasks related to SAT and other standardized testing questions for academic assessment.                                                                                                                                                                                                                                                 | Korean                                                                                                                        |
-| [darija_bench](darija_bench/README.md)                                   | Traditional NLP tasks (Translation, Summarization, etc..) for Moroccan Darija                                                                                                                                                                                                                                                          | Moroccan Darija (some MT)                                                                                                     |
-| [darijahellaswag](darijahellaswag/README.md)                             | Moroccan Darija version of HellaSwag.                                                                                                                                                                                                                                                                                                  | Moroccan Darija (MT)                                                                                                          |
-| [darijammlu](darijammlu/README.md)                                       | Multiple-choice QA in Moroccan Darija (an Arabic dialect).                                                                                                                                                                                                                                                                             | Moroccan Darija (MT)                                                                                                          |
-| [discrim_eval](discrim_eval/README.md)                                     | Prompts for binary decisions covering 70 scenarios to evaluate demographic bias. | English |
-| [drop](drop/README.md)                                                   | Tasks requiring numerical reasoning, reading comprehension, and question answering.                                                                                                                                                                                                                                                    | English                                                                                                                       |
-| [egyhellaswag](egyhellaswag/README.md)                                   | Egyptian Arabic (Masri) version of HellaSwag.                                                                                                                                                                                                                                                                                          | Egyptian Arabic (MT)                                                                                                          |
-| [egymmlu](egymmlu/README.md)                                             | Multiple-choice QA in Egyptian Arabic.                                                                                                                                                                                                                                                                                                 | Egyptian Arabic (MT)                                                                                                          |
-| [eq_bench](eq_bench/README.md)                                           | Tasks focused on equality and ethics in question answering and decision-making.                                                                                                                                                                                                                                                        | English                                                                                                                       |
-| [esbbq](esbbq/README.md)                                                   | Adaptation of the [BBQ](bbq/README.md) benchmark to the Spanish language and stereotypes prevalent in Spain.                                                                                                                                                                                                                           | Spanish                                                                                                                       |
-| [eus_exams](eus_exams/README.md)                                         | Tasks based on various professional and academic exams in the Basque language.                                                                                                                                                                                                                                                         | Basque                                                                                                                        |
-| [eus_proficiency](eus_proficiency/README.md)                             | Tasks designed to test proficiency in the Basque language across various topics.                                                                                                                                                                                                                                                       | Basque                                                                                                                        |
-| [eus_reading](eus_reading/README.md)                                     | Reading comprehension tasks specifically designed for the Basque language.                                                                                                                                                                                                                                                             | Basque                                                                                                                        |
-| [eus_trivia](eus_trivia/README.md)                                       | Trivia atypicnd knowledge testing tasks in the Basque language.                                                                                                                                                                                                                                                                             | Basque                                                                                                                        |
-| [evalita_LLM](evalita_llm/README.md)                                     | A native Italian benchmark with diverse tasks formats and multiple prompts.                                                                                                                                                                                                                                                            | Italian                                                                                                                       |
-| [fda](fda/README.md)                                                     | Tasks for extracting key-value pairs from FDA documents to test information extraction.                                                                                                                                                                                                                                                | English                                                                                                                       |
-| [fld](fld/README.md)                                                     | Tasks involving free-form and directed dialogue understanding.                                                                                                                                                                                                                                                                         | English                                                                                                                       |
-| [french_bench](french_bench/README.md)                                   | Set of tasks designed to assess language model performance in French.                                                                                                                                                                                                                                                                  | French                                                                                                                        |
-| [galician_bench](galician_bench/README.md)                               | Collection of tasks in Galician encompassing various evaluation areas.                                                                                                                                                                                                                                                                 | Galician                                                                                                                      |
-| [global_mmlu](global_mmlu/README.md)                                     | Collection of culturally sensitive and culturally agnostic MMLU tasks in 15 languages with human translations or post-edits.                                                                                                                                                                                                           | Multiple (15 languages)                                                                                                       |
-| [glue](glue/README.md)                                                   | General Language Understanding Evaluation benchmark to test broad language abilities.                                                                                                                                                                                                                                                  | English                                                                                                                       |
-| [gpqa](gpqa/README.md)                                                   | Tasks designed for general public question answering and knowledge verification.                                                                                                                                                                                                                                                       | English                                                                                                                       |
-| [gsm8k](gsm8k/README.md)                                                 | A benchmark of grade school math problems aimed at evaluating reasoning capabilities.                                                                                                                                                                                                                                                  | English                                                                                                                       |
-| [groundcocoa](groundcocoa/README.md)                                     | A benchmark evaluating the conditional and compositional reasoning of language models using a grounding task.                                                                                                                                                                                                                          | English                                                                                                                       |
-| [haerae](haerae/README.md)                                               | Tasks focused on assessing detailed factual and historical knowledge.                                                                                                                                                                                                                                                                  | Korean                                                                                                                        |
-| [headqa](headqa/README.md)                                               | A high-level education-based question answering dataset to test specialized knowledge.                                                                                                                                                                                                                                                 | Spanish, English                                                                                                              |
-| [hellaswag](hellaswag/README.md)                                         | Tasks to predict the ending of stories or scenarios, testing comprehension and creativity.                                                                                                                                                                                                                                             | English                                                                                                                       |
-| [hendrycks_ethics](hendrycks_ethics/README.md)                           | Tasks designed to evaluate the ethical reasoning capabilities of models.                                                                                                                                                                                                                                                               | English                                                                                                                       |
-| [hendrycks_math](hendrycks_math/README.md)                               | Mathematical problem-solving tasks to test numerical reasoning and problem-solving.                                                                                                                                                                                                                                                    | English                                                                                                                       |
-| [histoires_morales](histoires_morales/README.md)                         | A dataset of structured narratives that describe normative and norm-divergent actions taken by individuals to accomplish certain intentions in concrete situations.                                                                                                                                                                    | French (Some MT)                                                                                                              |
-| [hrm8k](hrm8k/README.md)                                                 | A challenging bilingual math reasoning benchmark for Korean and English.                                                                                                                                                                                                                                                               | Korean (Some MT), English (Some MT)                                                                                           |
-| [humaneval](humaneval/README.md)                                         | Code generation task that measure functional correctness for synthesizing programs from docstrings.                                                                                                                                                                                                                                    | Python                                                                                                                        |
-| [humaneval_infilling](humaneval_infilling/README.md)                     | Code generation task that measure fill-in-the-middle capability for synthesizing programs from docstrings.                                                                                                                                                                                                                             | Python                                                                                                                     |
-| [icelandic_winogrande](icelandic_winogrande/README.md)                   | Manually translated and localized version of the [WinoGrande](winogrande/README.md) commonsense reasoning benchmark for Icelandic.                                                                                                                                                                                                     | Icelandic                                                                                                                     |
-| [ifeval](ifeval/README.md)                                               | Interactive fiction evaluation tasks for narrative understanding and reasoning.                                                                                                                                                                                                                                                        | English                                                                                                                       |
-| [inverse_scaling](inverse_scaling/README.md)                             | Multiple-choice tasks from the Inverse Scaling Prize, designed to find settings where larger language models perform worse.                                                                                                                                                                                                            | English                                                                                                                       |
-| [japanese_leaderboard](japanese_leaderboard/README.md)                   | Japanese language understanding tasks to benchmark model performance on various linguistic aspects.                                                                                                                                                                                                                                    | Japanese                                                                                                                      |
-| [jsonschema_bench](jsonschema_bench/README.md)                           | Evaluate the ability of LLMs to generate JSON objects that conform to a given JSON schema, including API, configuration files, and other structured data formats.                                                                                                                                                                      | JSON                                                                                                                          |
-| [kbl](kbl/README.md)                                                     | Korean Benchmark for Legal Language Understanding.                                                                                                                                                                                                                                                                                     | Korean                                                                                                                        |
-| [kmmlu](kmmlu/README.md)                                                 | Knowledge-based multi-subject multiple choice questions for academic evaluation.                                                                                                                                                                                                                                                       | Korean                                                                                                                        |
-| [kobest](kobest/README.md)                                               | A collection of tasks designed to evaluate understanding in Korean language{Fecha: language.                                                                                                                                                                                                                                           | Korean                                                                                                                        |
-| [kormedmcqa](kormedmcqa/README.md)                                       | Medical question answering tasks in Korean to test specialized domain knowledge.                                                                                                                                                                                                                                                       | Korean                                                                                                                        |
-| [lambada](lambada/README.md)                                             | Tasks designed to predict the endings of text passages, testing language prediction skills.                                                                                                                                                                                                                                            | English                                                                                                                       |
-| [lambada_cloze](lambada_cloze/README.md)                                 | Cloze-style LAMBADA dataset.                                                                                                                                                                                                                                                                                                           | English                                                                                                                       |
-| [lambada_multilingual](lambada_multilingual/README.md)                   | Multilingual LAMBADA dataset. This is a legacy version of the multilingual dataset, and users should instead use `lambada_multilingual_stablelm`.                                                                                                                                                                                      | German, English, Spanish, French, Italian                                                                                     |
-| [lambada_multilingual_stablelm](lambada_multilingual_stablelm/README.md) | Multilingual LAMBADA dataset. Users should prefer evaluating on this version of the multilingual dataset instead of on `lambada_multilingual`.                                                                                                                                                                                         | German, English, Spanish, French, Italian, Dutch, Portuguese                                                                  |
-| [leaderboard](leaderboard/README.md)                                     | Task group used by Hugging Face's [Open LLM Leaderboard v2](https://huggingface.co/spaces/open-llm-leaderboard/open_llm_leaderboard). Those tasks are static and will not change through time                                                                                                                                          | English                                                                                                                       |
-| [lingoly](lingoly/README.md)                                             | Challenging logical reasoning benchmark in low-resource languages with controls for memorization                                                                                                                                                                                                                                       | English, Multilingual                                                                                                         |
-| [llama3](llama3/README.md)                                               | Evals reproducing those provided by the LLAMA team in the Hugging Face repo (instruct)                                                                                                                                                                                                                                                 | English, Multilingual                                                                                                         |
-| [libra](libra/README.md)                                                 | Evaluates long-context understanding in Russian across four complexity levels                                                                                                                                                                                                                                                          | Russian (MT)                                                                                                                  |
-| [lm_syneval](lm_syneval/README.md)                                       | Evaluates the syntactic capabilities of language models.                                                                                                                                                                                                                                                                               | English                                                                                                                       |
-| [logiqa](logiqa/README.md)                                               | Logical reasoning tasks requiring advanced inference and deduction.                                                                                                                                                                                                                                                                    | English, Chinese                                                                                                              |
-| [logiqa2](logiqa2/README.md)                                             | Large-scale logical reasoning dataset adapted from the Chinese Civil Service Examination.                                                                                                                                                                                                                                              | English, Chinese                                                                                                              |
-| [longbench](longbench/README.md)                                         | LongBench evaluates language models' ability to understand lengthy texts across multiple tasks and languages.                                                                                                                                                                                                                          | English, Chinese                                                                                                              |
-| [mastermind](mastermind/README.md)                                       | Reasoning benchmark based on the board game of Mastermind.                                                                                                                                                                                                                                                                             | English                                                                                                                       |
-| [mathqa](mathqa/README.md)                                               | Question answering tasks involving mathematical reasoning and problem-solving.                                                                                                                                                                                                                                                         | English                                                                                                                       |
-| [mbpp](mbpp/README.md)                                                   | A benchmark designed to measure the ability to synthesize short Python programs from natural language descriptions.                                                                                                                                                                                                                    | Python                                                                                                                        |
-| [meddialog](meddialog/README.md)                                         | Medical open-ended QA and Question Entailment stemming from the MedDialog dataset.                                                                                                                                                                                                                                                     | English                                                                                                                       |
-| [medtext](medtext/README.md)                                             | Medical open-ended QA from the MedText Clinical Notes dataset.                                                                                                                                                                                                                                                                         | English                                                                                                                       |
-| [mimic_repsum](mimic_repsum/README.md)                                   | Medical report summarization from the MIMIC-III dataset.                                                                                                                                                                                                                                                                               | English                                                                                                                       |
-| [mc_taco](mc_taco/README.md)                                             | Question-answer pairs that require temporal commonsense comprehension.                                                                                                                                                                                                                                                                 | English                                                                                                                       |
-| [med_concepts_qa](med_concepts_qa/README.md)                             | Benchmark for evaluating LLMs on their abilities to interpret medical codes and distinguish between medical concept.                                                                                                                                                                                                                   | English                                                                                                                       |
-| [metabench](metabench/README.md)                                         | Distilled versions of six popular benchmarks which are highly predictive of overall benchmark performance and of a single general ability latent trait.                                                                                                                                                                                | English                                                                                                                       |
-| [mediqa_qa2019](mediqa_qa2019/README.md)                                 | Open-ended healthcare question answering benchmark from the MEDIQA 2019 challenge.                                                                                                                                                                                                                                                     | English                                                                                                                       |
-| medmcqa                                                                  | Medical multiple choice questions assessing detailed medical knowledge.                                                                                                                                                                                                                                                                | English                                                                                                                       |
-| medqa                                                                    | Multiple choice question answering based on the United States Medical License Exams.                                                                                                                                                                                                                                                   |                                                                                                                               |
-| [meqsum](meqsum/README.md)                                               | Healtcare Question Entailment benchmark from the MeqSum dataset.                                                                                                                                                                                                                                                                       |                                                                                                                               |
-| [mgsm](mgsm/README.md)                                                   | Benchmark of multilingual grade-school math problems.                                                                                                                                                                                                                                                                                  | Spanish, French, German, Russian, Chinese, Japanese, Thai, Swahili, Bengali, Telugu                                           |
-| [minerva_math](minerva_math/README.md)                                   | Mathematics-focused tasks requiring numerical reasoning and problem-solving skills.                                                                                                                                                                                                                                                    | English                                                                                                                       |
-| [mlqa](mlqa/README.md)                                                   | MultiLingual Question Answering benchmark dataset for evaluating cross-lingual question answering performance.                                                                                                                                                                                                                         | English, Arabic, German, Spanish, Hindi, Vietnamese, Simplified Chinese                                                       |
-| [mmlu](mmlu/README.md)                                                   | Massive Multitask Language Understanding benchmark for broad domain language evaluation. Several variants are supported.                                                                                                                                                                                                               | English                                                                                                                       |
-| [mmlu_redux](mmlu-redux/README.md)                                       | Refined Massive Multitask Language Understanding benchmark for broad domain evaluation with improved data quality.                                                                                                                                                                                                                     | English                                                                                                                       |
-| [mmlu_redux](mmlu-redux-spanish/README.md)                               | Refined Massive Multitask Language Understanding benchmark for broad domain evaluation with improved data quality.                                                                                                                                                                                                                     | Spanish                                                                                                                       |
-| [mmlu_pro](mmlu_pro/README.md)                                           | A refined set of MMLU, integrating more challenging, reasoning-focused questions and expanding the choice set from four to ten options.                                                                                                                                                                                                | English                                                                                                                       |
-| [mmlu-pro-plus](mmlu-pro-plus/README.md)                                 | A new test set for evaluating shortcut learning and higher-order reasoning of LLMs.                                                                                                                                                                                                                                                    | English                                                                                                                       |
-| [mmlu_prox](mmlu_prox/README.md)                                         | A multilingual benchmark that extends MMLU-Pro to multiple typologically diverse languages with human validation.                                                                                                                                                                                                                      | English, Japanese, Chinese, Korean, French, German, Spanish, Portuguese, Zulu, Swahili, Wolof, Yoruba, Thai, Arabic, Hindi, Bengali, Serbian, Hungarian, Vietnamese, Czech, Marathi, Afrikaans, Nepali, Telugu, Urdu, Russian, Indonesian, Italian, Ukrainian|
-| [mmlusr](mmlusr/README.md)                                               | Variation of MMLU designed to be more rigorous.                                                                                                                                                                                                                                                                                        | English                                                                                                                       |
-| model_written_evals                                                      | Evaluation tasks auto-generated for evaluating a collection of AI Safety concerns.                                                                                                                                                                                                                                                     |                                                                                                                               |
-| [moral_stories](moral_stories/README.md)                                 | A crowd-sourced dataset of structured narratives that describe normative and norm-divergent actions taken by individuals to accomplish certain intentions in concrete situations.                                                                                                                                                      | English                                                                                                                       |
-| [mts_dialog](mts_dialog/README.md)                                       | Open-ended healthcare QA from the MTS-Dialog dataset.                                                                                                                                                                                                                                                                                  | English                                                                                                                       |
-| [multi_turn_generic](multi_turn_generic/README.md)                       | Three-phase multi-turn evaluation system testing iterative problem-solving through Analysis → Design → Implementation phases with comprehensive scoring metrics.                                                                                                                                                                      | English                                                                                                                       |
-| [multi_turn_scenarios](multi_turn_scenarios/README.md)                   | Flexible multi-turn conversation evaluation framework supporting 8+ scenario types including code review, problem solving, teaching dialogue, and conversational scenarios with customizable chat templates.                                                                                                                            | English                                                                                                                       |
-| [multiblimp](multiblimp/README.md)                                       | MultiBLiMP is a (synthetic) multilingual benchmark testing models on linguistic minimal pairs to judge grammatical acceptability                                                                                                                                                                                                       | Multiple (101 languages) - Synthetic                                                                                          |
-| [mutual](mutual/README.md)                                               | A retrieval-based dataset for multi-turn dialogue reasoning.                                                                                                                                                                                                                                                                           | English                                                                                                                       |
-| [noreval](noreval/README.md)                                             | A human-created Norwegian language understanding and generation benchmark.                                                                                                                                                                                                                                                             | Norwegian (Bokmål and Nynorsk)                                                                                                |
-| [nq_open](nq_open/README.md)                                             | Open domain question answering tasks based on the Natural Questions dataset.                                                                                                                                                                                                                                                           | English                                                                                                                       |
-| [okapi/arc_multilingual](okapi/arc_multilingual/README.md)               | Tasks that involve reading comprehension and information retrieval challenges.                                                                                                                                                                                                                                                         | Multiple (31 languages) **Machine Translated.**                                                                               |
-| [okapi/hellaswag_multilingual](okapi/hellaswag_multilingual/README.md)   | Tasks that involve reading comprehension and information retrieval challenges.                                                                                                                                                                                                                                                         | Multiple (30 languages) **Machine Translated.**                                                                               |
-| okapi/mmlu_multilingual                                                  | Tasks that involve reading comprehension and information retrieval challenges.                                                                                                                                                                                                                                                         | Multiple (34 languages) **Machine Translated.**                                                                               |
-| [okapi/truthfulqa_multilingual](okapi/truthfulqa_multilingual/README.md) | Tasks that involve reading comprehension and information retrieval challenges.                                                                                                                                                                                                                                                         | Multiple (31 languages) **Machine Translated.**                                                                               |
-| [olaph](olaph/README.md)                                                 | Open-ended medical factuality Question Answering from the OLAPH dataset.                                                                                                                                                                                                                                                               | English                                                                                                                       |
-| [openbookqa](openbookqa/README.md)                                       | Open-book question answering tasks that require external knowledge and reasoning.                                                                                                                                                                                                                                                      | English                                                                                                                       |
-| [paloma](paloma/README.md)                                               | Paloma is a comprehensive benchmark designed to evaluate open language models across a wide range of domains, ranging from niche artist communities to mental health forums on Reddit.                                                                                                                                                 | English                                                                                                                       |
-| [paws-x](paws-x/README.md)                                               | Paraphrase Adversaries from Word Scrambling, focusing on cross-lingual capabilities.                                                                                                                                                                                                                                                   | English, French, Spanish, German, Chinese, Japanese, Korean                                                                   |
-| [pile](pile/README.md)                                                   | Open source language modelling data set that consists of 22 smaller, high-quality datasets.                                                                                                                                                                                                                                            | English                                                                                                                       |
-| [pile_10k](pile_10k/README.md)                                           | The first 10K elements of The Pile, useful for debugging models trained on it.                                                                                                                                                                                                                                                         | English                                                                                                                       |
-| [piqa](piqa/README.md)                                                   | Physical Interaction Question Answering tasks to test physical commonsense reasoning.                                                                                                                                                                                                                                                  | English                                                                                                                       |
-| [polemo2](polemo2/README.md)                                             | Sentiment analysis and emotion detection tasks based on Polish language data.                                                                                                                                                                                                                                                          | Polish                                                                                                                        |
-| [portuguese_bench](portuguese_bench/README.md)                           | Collection of tasks in European Portuguese encompassing various evaluation areas.                                                                                                                                                                                                                                                      | Portuguese                                                                                                                    |
-| [prost](prost/README.md)                                                 | Tasks requiring understanding of professional standards and ethics in various domains.                                                                                                                                                                                                                                                 | English                                                                                                                       |
-| [python_code_completion](python_code_completion/README.md)               | Comprehensive Python code completion benchmark evaluating context adherence, style compliance, security awareness, and performance considerations with multiple context modes and difficulty levels.                                                                                                                                   | Python                                                                                                                        |
-| [pubmedqa](pubmedqa/README.md)                                           | Question answering tasks based on PubMed research articles for biomedical understanding.                                                                                                                                                                                                                                               | English                                                                                                                       |
-| [qa4mre](qa4mre/README.md)                                               | Question Answering for Machine Reading Evaluation, assessing comprehension and reasoning.                                                                                                                                                                                                                                              | English                                                                                                                       |
-| [qasper](qasper/README.md)                                               | Question Answering dataset based on academic papers, testing in-depth scientific knowledge.                                                                                                                                                                                                                                            | English                                                                                                                       |
-| [race](race/README.md)                                                   | Reading comprehension assessment tasks based on English exams in China.                                                                                                                                                                                                                                                                | English                                                                                                                       |
-| realtoxicityprompts                                                      | Tasks to evaluate language models for generating text with potential toxicity.                                                                                                                                                                                                                                                         |                                                                                                                               |
-| [ruler](ruler/README.md)                                                 | RULER is a benchmark for testing how well language models handle long pieces of text. Requires custom arg (see readme)                                                                                                                                                                                                                 | English                                                                                                                       |
-| [sciq](sciq/README.md)                                                   | Science Question Answering tasks to assess understanding of scientific concepts.                                                                                                                                                                                                                                                       | English                                                                                                                       |
-| [score](score/README.md)                                                 | Systematic consistency and robustness evaluation for LLMs on 3 datasets(MMLU-Pro, Agi Eval and MATH)                                                                                                                                                                                                                                   | English                                                                                                                       |
-| [scrolls](scrolls/README.md)                                             | Tasks that involve long-form reading comprehension across various domains.                                                                                                                                                                                                                                                             | English                                                                                                                       |
-| [simple_cooccurrence_bias](simple_cooccurrence_bias/README.md)           | A metric that evaluates language models for biases based on stereotypical word associations and co-occurrences in text.                                                                                                                                                                                                                | English                                                                                                                       |
-| [siqa](siqa/README.md)                                                   | Social Interaction Question Answering to evaluate common sense and social reasoning.                                                                                                                                                                                                                                                   | English                                                                                                                       |
-| [spanish_bench](spanish_bench/README.md)                                 | Collection of tasks in Spanish encompassing various evaluation areas.                                                                                                                                                                                                                                                                  | Spanish                                                                                                                       |
-| [squad_completion](squad_completion/README.md)                           | A variant of the SQuAD question answering task designed for zero-shot evaluation of small LMs.                                                                                                                                                                                                                                         | English                                                                                                                       |
-| [squadv2](squadv2/README.md)                                             | Stanford Question Answering Dataset version 2, a reading comprehension benchmark.                                                                                                                                                                                                                                                      | English                                                                                                                       |
-| [storycloze](storycloze/README.md)                                       | Tasks to predict story endings, focusing on narrative logic and coherence.                                                                                                                                                                                                                                                             | English                                                                                                                       |
-| [super_glue](super_glue/README.md)                                       | A suite of challenging tasks designed to test a range of language understanding skills.                                                                                                                                                                                                                                                | English                                                                                                                       |
-| [swag](swag/README.md)                                                   | Situations With Adversarial Generations, predicting the next event in videos.                                                                                                                                                                                                                                                          | English                                                                                                                       |
-| [swde](swde/README.md)                                                   | Information extraction tasks from semi-structured web pages.                                                                                                                                                                                                                                                                           | English                                                                                                                       |
-| [tinyBenchmarks](tinyBenchmarks/README.md)                               | Evaluation of large language models with fewer examples using tiny versions of popular benchmarks.                                                                                                                                                                                                                                     | English                                                                                                                       |
-| [tmmluplus](tmmluplus/README.md)                                         | An extended set of tasks under the TMMLU framework for broader academic assessments.                                                                                                                                                                                                                                                   | Traditional Chinese                                                                                                           |
-| [toxigen](toxigen/README.md)                                             | Tasks designed to evaluate language models on their propensity to generate toxic content.                                                                                                                                                                                                                                              | English                                                                                                                       |
-| [translation](translation/README.md)                                     | Tasks focused on evaluating the language translation capabilities of models.                                                                                                                                                                                                                                                           | Arabic, English, Spanish, Basque, Hindi, Indonesian, Burmese, Russian, Swahili, Telugu, Chinese                               |
-| [triviaqa](triviaqa/README.md)                                           | A large-scale dataset for trivia question answering to test general knowledge.                                                                                                                                                                                                                                                         | English                                                                                                                       |
-| [truthfulqa](truthfulqa/README.md)                                       | A QA task aimed at evaluating the truthfulness and factual accuracy of model responses.                                                                                                                                                                                                                                                | English                                                                                                                       |
-| [truthfulqa-multi](truthfulqa-multi/README.md)                           | Is a multilingual version of TruthfulQA, a QA task aimed at evaluating the truthfulness and factual accuracy of model responses.                                                                                                                                                                                                       | English, Spanish, Catalan, Basque, Galician                                                                                   |
-| [turkishmmlu](turkishmmlu/README.md)                                     | A multiple-choice QA test modeled after MMLU, written in Turkish based on Turkish high-school level exams.                                                                                                                                                                                                                             | Turkish                                                                                                                       |
-| [turblimp_core](turblimp/README.md)                                      | A benchmark evaluating language models' grammatical capabilities in Turkish based on comparing the probabilities of minimal pairs of grammatical and ungrammatical sentences.                                                                                                                                                          | Turkish                                                                                                                       |
-| [unitxt](unitxt/README.md)                                               | A number of tasks implemented using the unitxt library for flexible, shareable, and reusable data preparation and evaluation for generative AI.                                                                                                                                                                                        | English                                                                                                                       |
-| [unscramble](unscramble/README.md)                                       | Tasks involving the rearrangement of scrambled sentences to test syntactic understanding.                                                                                                                                                                                                                                              | English                                                                                                                       |
-| [webqs](webqs/README.md)                                                 | Web-based question answering tasks designed to evaluate internet search and retrieval.                                                                                                                                                                                                                                                 | English                                                                                                                       |
-| [wikitext](wikitext/README.md)                                           | Tasks based on text from Wikipedia articles to assess language modeling and generation.                                                                                                                                                                                                                                                | English                                                                                                                       |
-| [winogender](winogender/README.md)                                       | A diagnostic dataset that tests for gender bias in coreference resolution by measuring how models associate pronouns with different occupations.                                                                                                                                                                                       | English                                                                                                                       |
-| [winogrande](winogrande/README.md)                                       | A large-scale dataset for coreference resolution, inspired by the Winograd Schema Challenge.                                                                                                                                                                                                                                           | English                                                                                                                       |
-| [wmdp](wmdp/README.md)                                                   | A benchmark with the objective of minimizing performance, based on potentially-sensitive multiple-choice knowledge questions.                                                                                                                                                                                                          | English                                                                                                                       |
-| [wmt2016](wmt2016/README.md)                                             | Tasks from the WMT 2016 shared task, focusing on translation between multiple languages.                                                                                                                                                                                                                                               | English, Czech, German, Finnish, Russian, Romanian, Turkish                                                                   |
-| [wsc273](wsc273/README.md)                                               | The Winograd Schema Challenge, a test of commonsense reasoning and coreference resolution.                                                                                                                                                                                                                                             | English                                                                                                                       |
-| [xcopa](xcopa/README.md)                                                 | Cross-lingual Choice of Plausible Alternatives, testing reasoning in multiple languages.                                                                                                                                                                                                                                               | Estonian, Haitian, Indonesian, Italian, Quechua, Swahili, Tamil, Thai, Turkish, Vietnamese, Chinese                           |
-| [xnli](xnli/README.md)                                                   | Cross-Lingual Natural Language Inference to test understanding across different languages.                                                                                                                                                                                                                                             | Arabic, Bulgarian, German, Greek, English, Spanish, French, Hindi, Russian, Swahili, Thai, Turkish, Urdu, Vietnamese, Chinese |
-| [xnli_eu](xnli_eu/README.md)                                             | Cross-lingual Natural Language Inference tasks in Basque.                                                                                                                                                                                                                                                                              | Basque                                                                                                                        |
-| [xquad](xquad/README.md)                                                 | Cross-lingual Question Answering Dataset in multiple languages.                                                                                                                                                                                                                                                                        | Arabic, German, Greek, English, Spanish, Hindi, Romanian, Russian, Thai, Turkish, Vietnamese, Chinese                         |
-| [xstorycloze](xstorycloze/README.md)                                     | Cross-lingual narrative understanding tasks to predict story endings in multiple languages.                                                                                                                                                                                                                                            | Russian, Simplified Chinese, Spanish, Arabic, Hindi, Indonesian, Telugu, Swahili, Basque, Burmese                             |
-| [xwinograd](xwinograd/README.md)                                         | Cross-lingual Winograd schema tasks for coreference resolution in multiple languages.                                                                                                                                                                                                                                                  | English, French, Japanese, Portuguese, Russian, Chinese                                                                       |
-| [zhoblimp](zhoblimp/README.md)                                           | A benchmark evaluating language models' grammatical capabilities in Chinese based on comparing the probabilities of minimal pairs of grammatical and ungrammatical sentences.                                                                                                                                                          | Chinese                                                                                                                       |
+| Task Family | Description | Language(s) | Usage | Results Analysis |
+|-------------|-------------|-------------|-------|------------------|
+| [multi_turn_coding](multi_turn_coding/README.md) | Multi-turn coding evaluation testing complete software development lifecycle through PRD → Design → Implementation → Quality phases with file system integration and multiple model backend support. | Python | `lm_eval --model claude-code-local --model_args model=claude-3-haiku-20240307,multi_turn=true --tasks multi_turn_coding_eval_claude_code --limit 1 --output_path results/multi_turn_results.json --log_samples` | `python quick_results.py results/` or `python analyze_context_impact.py` |
+| [multi_turn_generic](multi_turn_generic/README.md) | Three-phase multi-turn evaluation system testing iterative problem-solving through Analysis → Design → Implementation phases with comprehensive scoring metrics. | English | `lm_eval --model hf --model_args pretrained=model-name --tasks multi_turn_generic --limit 5 --output_path results/generic_results.json --log_samples --apply_chat_template` | `python analyze_results.py results/` with phase-specific analysis |
+| [multi_turn_scenarios](multi_turn_scenarios/README.md) | Flexible multi-turn conversation evaluation framework supporting 8+ scenario types including code review, problem solving, teaching dialogue, and conversational scenarios with full chat template support. | English | `lm_eval --model hf --model_args pretrained=model-name --tasks multi_turn_scenarios.code_review_3_turn --limit 3 --output_path results/scenarios_results.json --log_samples --apply_chat_template` | `python analyze_results.py results/ --recommendations` with scenario-specific insights |
+| [python_coding](python_coding/README.md) | Comprehensive Python coding evaluation suite with 5 task categories: code completion, repair, translation, docstring generation, and function generation. Includes context-aware evaluation and comparison tools. | Python | `lm_eval --model hf --model_args pretrained=model-name --tasks python_coding_suite --limit 10 --output_path results/python_coding_results.json --log_samples` | `python analyze_context_impact.py results/` |
 
-## Multimodal Tasks
+## Detailed Task Descriptions
 
-| Task Family                  | Description                                                                                             | Modality    |
-| ---------------------------- | ------------------------------------------------------------------------------------------------------- | ----------- |
-| [chartqa](chartqa/README.md) | A benchmark for question answering about charts that requires both visual and logical reasoning.        | Image, Text |
-| [mmmu](mmmu/README.md)       | Evaluate multimodal models on massive multi-discipline tasks demanding college-level subject knowledge. | Image, Text |
+### 1. Multi-Turn Coding (`multi_turn_coding`)
+
+**Purpose**: Evaluates models on complete software development lifecycle through sequential phases.
+
+**Phases**:
+1. **PRD Generation** - Create Product Requirements Document
+2. **Technical Design** - System architecture and API specifications  
+3. **Code Implementation** - Complete Python project with tests
+4. **Quality Metrics** - Define measurable evaluation criteria
+
+**Key Features**:
+- 45 diverse problems across 5 difficulty levels (Easy, Simple, Medium, Complex)
+- Real file system integration with artifact generation
+- Multi-model backend support (Claude Code, DeepSeek, OpenAI, Anthropic)
+- Cross-platform testing scripts (Linux/macOS and Windows)
+
+**Usage Examples**:
+```bash
+# Quick test with easy problems (uses simple_test.sh)
+./simple_test.sh --difficulty easy
+
+# Test with different model backends
+./simple_test.sh --model-backend deepseek --model-name deepseek-v3.1
+./simple_test.sh --model-backend openai --model-name gpt-4-turbo
+
+# Full evaluation with Claude Code SDK
+lm_eval --model claude-code-local \
+    --model_args model=claude-3-sonnet-20240229,multi_turn=true \
+    --tasks multi_turn_coding_eval_claude_code \
+    --limit 5 \
+    --output_path results/multi_turn_claude_results.json \
+    --log_samples
+```
+
+**Results Analysis**:
+```bash
+# Quick results overview (run from multi_turn_coding directory)
+cd lm_eval/tasks/multi_turn_coding
+python quick_results.py results/
+
+# Single model analysis
+python compare_models.py results/deepseek_comparison*.json --verbose
+
+# Multi-model comparison (when multiple result files exist)
+python compare_models.py results/*_comparison*.json
+
+# Context impact analysis (requires specific file naming)
+python analyze_context_impact.py --results_dir results/
+
+# Difficulty comparison analysis
+python analyze_difficulty_comparison.py
+```
+
+### 2. Multi-Turn Generic (`multi_turn_generic`)
+
+**Purpose**: Tests iterative problem-solving capabilities through structured phases.
+
+**Phases**:
+1. **Problem Analysis** - Understanding and breaking down problems
+2. **Solution Design** - Creating structured solution approaches
+3. **Implementation** - Writing complete, working code
+
+**Key Features**:
+- Sequential context-dependent interactions
+- Comprehensive scoring across all phases
+- Chat template support for instruction-tuned models
+- Built-in consistency checking between phases
+
+**Usage Examples**:
+```bash
+# Basic evaluation
+lm_eval --model hf \
+    --model_args pretrained=your-model-name \
+    --tasks multi_turn_generic \
+    --limit 5 \
+    --output_path results/generic_evaluation.json \
+    --log_samples \
+    --apply_chat_template
+
+# With custom parameters
+lm_eval --model hf \
+    --model_args pretrained=your-model-name,temperature=0.1,max_length=2048 \
+    --tasks multi_turn_generic \
+    --limit 10 \
+    --output_path results/generic_custom.json \
+    --log_samples \
+    --apply_chat_template
+```
+
+**Results Analysis**:
+```bash
+# Comprehensive phase analysis
+python analyze_results.py results/
+
+# Detailed analysis with raw data
+python analyze_results.py results/ --verbose
+```
+- **Built-in Metrics**: `multi_turn_score`, `phase_consistency`, `solution_quality`
+- **Phase-Specific Analysis**: Performance breakdown by Analysis, Design, Implementation phases
+- **Performance Insights**: Best/worst performing areas with improvement recommendations
+- **Automatic Evaluation**: Phase-to-phase consistency checking
+
+### 3. Multi-Turn Scenarios (`multi_turn_scenarios`)
+
+**Purpose**: Flexible framework for diverse multi-turn interaction patterns.
+
+**Scenario Types**:
+- **Code Review** - Collaborative code improvement workflows
+- **Iterative Problem Solving** - Progressive solution refinement  
+- **Teaching Dialogue** - Instructional conversations with assessment
+- **Conversational** - Natural multi-turn conversations
+- **Workflow** - Structured task completion processes
+- **Collaborative** - Multi-party interaction scenarios
+- **Debug Sessions** - Interactive debugging workflows
+- **Design Iterations** - Iterative design and feedback cycles
+
+**Key Features**:
+- Extensible scenario system with registry
+- Full chat template integration (ChatML, Llama, Alpaca, etc.)
+- Scenario-specific evaluation metrics
+- Dynamic scenario discovery
+
+**Usage Examples**:
+```bash
+# Code review scenario
+lm_eval --model hf \
+    --model_args pretrained=your-model-name \
+    --tasks multi_turn_scenarios.code_review_3_turn \
+    --limit 3 \
+    --output_path results/code_review_results.json \
+    --log_samples \
+    --apply_chat_template
+
+# Iterative problem solving
+lm_eval --model hf \
+    --model_args pretrained=your-model-name \
+    --tasks multi_turn_scenarios.iterative_problem_solving \
+    --limit 5 \
+    --output_path results/problem_solving_results.json \
+    --log_samples \
+    --apply_chat_template
+
+# Teaching dialogue
+lm_eval --model hf \
+    --model_args pretrained=your-model-name \
+    --tasks multi_turn_scenarios.teaching_dialogue \
+    --limit 3 \
+    --output_path results/teaching_results.json \
+    --log_samples \
+    --apply_chat_template
+```
+
+**Results Analysis**:
+```bash
+# Scenario performance analysis
+python analyze_results.py results/
+
+# With improvement recommendations
+python analyze_results.py results/ --recommendations
+
+# Detailed analysis with raw data
+python analyze_results.py results/ --verbose
+```
+- **Scenario-Specific Metrics** - Tailored evaluation for each interaction type
+- **Performance Ranking** - Scenarios ranked by average performance
+- **Distribution Analysis** - Performance distribution across scenario types
+- **Improvement Recommendations** - Targeted suggestions for weak areas
+
+### 4. Python Coding (`python_coding`)
+
+**Purpose**: Comprehensive evaluation of Python coding capabilities across multiple dimensions.
+
+**Task Categories**:
+1. **Code Completion** (`python_code_completion`) - Complete partial code snippets
+2. **Code Repair** (`python_code_repair`) - Fix buggy code to make it work
+3. **Code Translation** (`python_code_translation`) - Translate code to Python
+4. **Docstring Generation** (`python_docstring_generation`) - Generate documentation
+5. **Function Generation** (`python_function_generation`) - Create functions from descriptions
+
+**Key Features**:
+- 25 problems (5 per category) with real-world scenarios
+- Context-aware evaluation with company-specific requirements
+- Multiple evaluation metrics per task type
+- Aggregate scoring across all categories
+
+**Usage Examples**:
+```bash
+# Run complete suite
+lm_eval --model hf \
+    --model_args pretrained=your-model-name \
+    --tasks python_coding_suite \
+    --limit 25 \
+    --output_path results/python_suite_results.json \
+    --log_samples
+
+# Run individual tasks
+lm_eval --model hf \
+    --model_args pretrained=your-model-name \
+    --tasks python_code_completion \
+    --limit 5 \
+    --output_path results/code_completion_results.json \
+    --log_samples
+
+# Context comparison evaluation
+./run_context_comparison.sh
+```
+
+**Results Analysis**:
+```bash
+# Single model analysis (run from python_coding directory)
+cd lm_eval/tasks/python_coding
+python analyze_context_impact.py --results_dir results/
+
+# Compare full vs no context performance
+./run_full_vs_no_context.sh
+
+# Multi-model comparison
+python compare_models.py results/*_results*.json
+```
+
+**Evaluation Metrics by Task**:
+- **Code Completion**: exact_match, BLEU (128 tokens)
+- **Code Repair**: exact_match, edit_distance (256 tokens)  
+- **Code Translation**: exact_match, BLEU, CodeBLEU (512 tokens)
+- **Docstring Generation**: exact_match, BLEU, ROUGE, METEOR (256 tokens)
+- **Function Generation**: exact_match, pass@k (512 tokens)
+
+## General Usage Guidelines
+
+### Quick Start for Any Task
+
+1. **Install Dependencies**:
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+2. **Set API Keys** (if using API-based models):
+   ```bash
+   export ANTHROPIC_API_KEY="your-key"  # For Claude models
+   export OPENAI_API_KEY="your-key"     # For OpenAI models
+   export DASHSCOPE_API_KEY="your-key"  # For DeepSeek models
+   ```
+
+3. **Run Evaluation**:
+   ```bash
+   # For local models
+   lm_eval --model hf --model_args pretrained=your-model --tasks task_name
+   
+   # For API models with chat templates
+   lm_eval --model hf --model_args pretrained=your-model --tasks task_name --apply_chat_template
+   ```
+
+4. **Analyze Results**:
+   ```bash
+   # Each task has its own analysis script
+   python analyze_results.py results/
+   ```
+
+### Common Parameters
+
+- `--limit N` - Limit number of problems to evaluate
+- `--output_path path` - Specify output file location
+- `--log_samples` - Save detailed sample outputs
+- `--apply_chat_template` - Use chat templates for instruction-tuned models
+- `--batch_size N` - Set batch size for evaluation
+
+### Results Location
+
+Results are typically saved to:
+- **JSON Results**: `results/task_name_timestamp.json`
+- **Sample Outputs**: `samples_task_name_timestamp.jsonl`
+- **Generated Artifacts**: `output/` directory (for coding tasks)
+
+### Troubleshooting
+
+1. **Missing Dependencies**: Run `pip install -r requirements.txt` in the task directory
+2. **API Key Issues**: Ensure environment variables are set correctly
+3. **Memory Issues**: Reduce `--batch_size` or `--limit`
+4. **Chat Template Issues**: Verify model supports chat templates or remove `--apply_chat_template`
+
+For task-specific issues, refer to the individual README.md files in each task directory.
+
+## Troubleshooting Common Issues
+
+### 1. Results Analysis Problems
+
+**Issue**: `analyze_context_impact.py` reports "No results found to analyze"
+```bash
+⚠️  Missing Full Context: ['full_context_test*.json', 'full_context_results*.json']
+❌ No results found to analyze
+```
+
+**Solution**: Use the flexible `compare_models.py` script instead:
+```bash
+cd lm_eval/tasks/multi_turn_coding
+python compare_models.py results/*.json --verbose
+```
+
+**Issue**: Most metrics show 0.000 values
+**Cause**: Model failed to complete tasks properly (API issues, configuration problems, etc.)
+**Solution**: 
+- Check API keys are set correctly
+- Verify model has sufficient context length
+- Try with a simpler difficulty level: `--difficulty easy`
+- Check the sample output files for error messages
+
+### 2. Model Backend Issues
+
+**Issue**: DeepSeek evaluation fails or produces poor results
+**Solution**:
+```bash
+# Ensure API key is set
+export DASHSCOPE_API_KEY="your-key"
+
+# Try with explicit model configuration
+lm_eval --model deepseek \
+    --model_args model=deepseek-v3.1,temperature=0.0 \
+    --tasks multi_turn_coding_eval_deepseek \
+    --limit 1 \
+    --output_path results/deepseek_test.json \
+    --log_samples
+```
+
+**Issue**: DashScope/Qwen evaluation fails with API key error
+**Solution**:
+```bash
+# Ensure API key is set
+export DASHSCOPE_API_KEY="your-key"
+
+# Use universal task for DashScope models
+lm_eval --model dashscope \
+    --model_args model=qwen-plus \
+    --tasks multi_turn_coding_eval_universal \
+    --limit 1 \
+    --output_path results/qwen_test.json \
+    --log_samples
+```
+
+**Issue**: Claude Code SDK not working
+**Solution**:
+```bash
+# Install and configure Claude Code SDK
+pip install claude-code-sdk
+export ANTHROPIC_API_KEY="your-key"
+
+# Test with simple configuration
+lm_eval --model claude-code-local \
+    --model_args model=claude-3-haiku-20240307,multi_turn=true \
+    --tasks multi_turn_coding_eval_claude_code \
+    --limit 1 \
+    --output_path results/claude_test.json \
+    --log_samples
+```
+
+### 3. File Path Issues
+
+**Issue**: Results files not found in expected location
+**Solution**: Results are saved in task-specific directories:
+- Multi-turn coding: `lm_eval/tasks/multi_turn_coding/results/`
+- Python coding: `lm_eval/tasks/python_coding/results/`
+- Generic/Scenarios: Usually in workspace root `results/`
+
+**Issue**: Analysis scripts can't find files
+**Solution**: Always run analysis scripts from the correct directory:
+```bash
+# For multi-turn coding analysis
+cd lm_eval/tasks/multi_turn_coding
+python compare_models.py results/*.json
+
+# For python coding analysis  
+cd lm_eval/tasks/python_coding
+python analyze_context_impact.py --results_dir results/
+```
+
+### 4. Missing Dependencies
+
+**Issue**: `ModuleNotFoundError: No module named 'pandas'`
+**Solution**:
+```bash
+pip install pandas matplotlib seaborn numpy
+```
+
+**Issue**: `ModuleNotFoundError: No module named 'claude_code_sdk'`
+**Solution**:
+```bash
+pip install claude-code-sdk
+```
+
+### 5. Performance Issues
+
+**Issue**: Evaluation takes too long or times out
+**Solution**:
+- Reduce the number of problems: `--limit 1`
+- Use faster models: Claude Haiku instead of Opus
+- Use simpler difficulty: `--difficulty easy`
+- Check network connectivity for API-based models
+
+## Model Backend Usage Examples
+
+### Claude Code SDK (Recommended for Coding Tasks)
+
+**Setup**:
+```bash
+pip install claude-code-sdk
+export ANTHROPIC_API_KEY="your-anthropic-key"
+```
+
+**Usage Examples**:
+```bash
+# Multi-turn coding with Claude Code SDK
+lm_eval --model claude-code-local \
+    --model_args model=claude-3-haiku-20240307,multi_turn=true,debug=false \
+    --tasks multi_turn_coding_eval_claude_code \
+    --limit 3 \
+    --output_path results/claude_code_results.json \
+    --log_samples
+
+# With Sonnet for better performance
+lm_eval --model claude-code-local \
+    --model_args model=claude-3-sonnet-20240229,multi_turn=true \
+    --tasks multi_turn_coding_eval_claude_code \
+    --limit 5 \
+    --output_path results/claude_sonnet_results.json \
+    --log_samples
+```
+
+### Anthropic Claude API
+
+**Setup**:
+```bash
+export ANTHROPIC_API_KEY="your-anthropic-key"
+```
+
+**Usage Examples**:
+```bash
+# Multi-turn generic with Claude API
+lm_eval --model anthropic_llms \
+    --model_args model=claude-3-haiku-20240307 \
+    --tasks multi_turn_generic \
+    --limit 5 \
+    --output_path results/claude_api_generic.json \
+    --log_samples \
+    --apply_chat_template
+
+# Multi-turn scenarios with Claude Sonnet
+lm_eval --model anthropic_llms \
+    --model_args model=claude-3-sonnet-20240229 \
+    --tasks multi_turn_scenarios.code_review_3_turn \
+    --limit 3 \
+    --output_path results/claude_scenarios.json \
+    --log_samples \
+    --apply_chat_template
+
+# Python coding with Claude Opus
+lm_eval --model anthropic_llms \
+    --model_args model=claude-3-opus-20240229 \
+    --tasks python_coding_suite \
+    --limit 10 \
+    --output_path results/claude_python_coding.json \
+    --log_samples
+```
+
+### DeepSeek Models
+
+**Setup**:
+```bash
+export DASHSCOPE_API_KEY="your-dashscope-key"
+```
+
+**Usage Examples**:
+```bash
+# Multi-turn coding with DeepSeek
+lm_eval --model deepseek \
+    --model_args model=deepseek-v3.1 \
+    --tasks multi_turn_coding_eval_deepseek \
+    --limit 5 \
+    --output_path results/deepseek_coding.json \
+    --log_samples
+
+# Python coding with DeepSeek (cost-effective)
+lm_eval --model deepseek \
+    --model_args model=deepseek-v3.1 \
+    --tasks python_coding_suite \
+    --limit 25 \
+    --output_path results/deepseek_python.json \
+    --log_samples
+
+# Multi-turn generic with DeepSeek R1 (reasoning-focused)
+lm_eval --model deepseek \
+    --model_args model=deepseek-r1 \
+    --tasks multi_turn_generic \
+    --limit 10 \
+    --output_path results/deepseek_r1_generic.json \
+    --log_samples \
+    --apply_chat_template
+```
+
+### DashScope Models (Alibaba Cloud)
+
+**Setup**:
+```bash
+export DASHSCOPE_API_KEY="your-dashscope-key"
+```
+
+**Usage Examples**:
+```bash
+# Multi-turn scenarios with Qwen (use universal task for DashScope)
+lm_eval --model dashscope \
+    --model_args model=qwen-turbo \
+    --tasks multi_turn_coding_eval_universal \
+    --limit 5 \
+    --output_path results/qwen_scenarios.json \
+    --log_samples
+
+# Python coding with Qwen Max
+lm_eval --model dashscope \
+    --model_args model=qwen-max \
+    --tasks python_coding_suite \
+    --limit 15 \
+    --output_path results/qwen_python.json \
+    --log_samples
+
+# Multi-turn generic with Qwen Plus
+lm_eval --model dashscope \
+    --model_args model=qwen-plus \
+    --tasks multi_turn_generic \
+    --limit 8 \
+    --output_path results/qwen_generic.json \
+    --log_samples \
+    --apply_chat_template
+```
+
+### OpenAI Models
+
+**Setup**:
+```bash
+export OPENAI_API_KEY="your-openai-key"
+```
+
+**Usage Examples**:
+```bash
+# Multi-turn coding with GPT-4 Turbo
+lm_eval --model openai-completions \
+    --model_args model=gpt-4-turbo \
+    --tasks multi_turn_coding_eval_openai \
+    --limit 3 \
+    --output_path results/gpt4_coding.json \
+    --log_samples
+
+# Multi-turn coding with Qwen Plus (DashScope)
+lm_eval --model dashscope \
+    --model_args model=qwen-plus \
+    --tasks multi_turn_coding_eval_universal \
+    --limit 3 \
+    --output_path results/qwen_coding.json \
+    --log_samples
+
+# Python coding with GPT-4
+lm_eval --model openai-completions \
+    --model_args model=gpt-4 \
+    --tasks python_coding_suite \
+    --limit 20 \
+    --output_path results/gpt4_python.json \
+    --log_samples
+
+# Multi-turn scenarios with GPT-3.5 Turbo (cost-effective)
+lm_eval --model openai-completions \
+    --model_args model=gpt-3.5-turbo \
+    --tasks multi_turn_scenarios.teaching_dialogue \
+    --limit 5 \
+    --output_path results/gpt35_scenarios.json \
+    --log_samples \
+    --apply_chat_template
+
+# Multi-turn generic with GPT-4 Turbo
+lm_eval --model openai-completions \
+    --model_args model=gpt-4-turbo \
+    --tasks multi_turn_generic \
+    --limit 10 \
+    --output_path results/gpt4_generic.json \
+    --log_samples \
+    --apply_chat_template
+```
+
+### Model Selection Guidelines
+
+| Use Case | Recommended Model | Reason |
+|----------|------------------|---------|
+| **Coding Tasks** | Claude Code SDK | Best file system integration and coding capabilities |
+| **Cost-Effective Coding** | DeepSeek v3.1 | Excellent code generation at low cost |
+| **Reasoning Tasks** | Claude Opus or DeepSeek R1 | Strong reasoning and problem-solving abilities |
+| **Stable API** | OpenAI GPT-4 Turbo | Most reliable API with consistent performance |
+| **Chinese Language** | Qwen models via DashScope | Native Chinese language support |
+| **Batch Processing** | DeepSeek or GPT-3.5 Turbo | Cost-effective for large-scale evaluation |
+
+### Performance Comparison Commands
+
+```bash
+# Compare different models on same task
+lm_eval --model claude-code-local --model_args model=claude-3-haiku-20240307,multi_turn=true --tasks multi_turn_coding_eval_claude_code --limit 1 --output_path results/claude_comparison.json --log_samples
+
+lm_eval --model deepseek --model_args model=deepseek-v3.1 --tasks multi_turn_coding_eval_deepseek --limit 1 --output_path results/deepseek_comparison.json --log_samples
+
+lm_eval --model dashscope  --model_args model=qwen-plus --tasks multi_turn_coding_eval_openai --limit 1 --output_path results/qwen_comparison.json --log_samples
+
+# Then analyze and compare results (run from multi_turn_coding directory)
+cd lm_eval/tasks/multi_turn_coding
+python compare_models.py ../../../results/claude_comparison*.json ../../../results/qwen_comparison*.json results/deepseek_comparison*.json
+```
+  
