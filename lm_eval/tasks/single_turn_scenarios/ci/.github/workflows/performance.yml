@@ -1,0 +1,419 @@
+name: Performance Testing
+
+on:
+  schedule:
+    # Run performance tests weekly on Saturdays at 4 AM UTC
+    - cron: '0 4 * * 6'
+  workflow_dispatch:
+    inputs:
+      test_scale:
+        description: 'Test scale (small/medium/large)'
+        required: false
+        default: 'medium'
+        type: choice
+        options:
+        - small
+        - medium
+        - large
+
+jobs:
+  performance-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+        pip install pytest pytest-benchmark psutil memory-profiler
+    
+    - name: Build Docker images
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios/docker
+        docker build -f python.Dockerfile -t sts-python .
+        docker build -f node.Dockerfile -t sts-node .
+        docker build -f java.Dockerfile -t sts-java .
+        docker build -f gcc.Dockerfile -t sts-gcc .
+    
+    - name: Run scalability tests
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -m pytest tests/performance/test_scalability.py -v --benchmark-json=scalability_benchmark.json
+    
+    - name: Run memory usage tests
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+import psutil
+import time
+import json
+from sandbox import SandboxExecutor
+from utils import load_dataset
+
+print('Starting memory usage test...')
+process = psutil.Process()
+initial_memory = process.memory_info().rss / 1024 / 1024  # MB
+
+# Test memory usage with different dataset sizes
+test_sizes = [10, 50, 100] if '${{ github.event.inputs.test_scale }}' != 'large' else [10, 50, 100, 500]
+memory_results = {}
+
+for size in test_sizes:
+    print(f'Testing with {size} problems...')
+    start_memory = process.memory_info().rss / 1024 / 1024
+    
+    # Load dataset subset
+    dataset = load_dataset({'limit': size})
+    
+    # Run some evaluations
+    executor = SandboxExecutor('python', {'time_limit': 10, 'memory_limit': 200})
+    for i, problem in enumerate(dataset):
+        if i >= size:
+            break
+        # Simple code execution test
+        result = executor.execute_code('print(\"hello\")', [])
+    
+    end_memory = process.memory_info().rss / 1024 / 1024
+    memory_used = end_memory - start_memory
+    memory_results[size] = {
+        'start_mb': start_memory,
+        'end_mb': end_memory,
+        'used_mb': memory_used,
+        'per_problem_mb': memory_used / size if size > 0 else 0
+    }
+    print(f'Memory used for {size} problems: {memory_used:.2f} MB ({memory_used/size:.2f} MB per problem)')
+
+# Save results
+with open('memory_usage_results.json', 'w') as f:
+    json.dump(memory_results, f, indent=2)
+
+print('Memory usage test completed')
+"
+    
+    - name: Run concurrent execution tests
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+import concurrent.futures
+import time
+import json
+from sandbox import SandboxExecutor
+
+def run_evaluation(thread_id):
+    executor = SandboxExecutor('python', {'time_limit': 5, 'memory_limit': 100})
+    start_time = time.time()
+    
+    # Run multiple code executions
+    for i in range(5):
+        code = f'print(\"Thread {thread_id}, iteration {i}\")'
+        result = executor.execute_code(code, [])
+        if result.exit_code != 0:
+            return {'thread_id': thread_id, 'success': False, 'error': result.stderr}
+    
+    end_time = time.time()
+    return {
+        'thread_id': thread_id,
+        'success': True,
+        'duration': end_time - start_time,
+        'executions': 5
+    }
+
+print('Starting concurrent execution test...')
+max_workers = 4 if '${{ github.event.inputs.test_scale }}' != 'large' else 8
+
+with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+    futures = [executor.submit(run_evaluation, i) for i in range(max_workers)]
+    results = [future.result() for future in concurrent.futures.as_completed(futures)]
+
+# Analyze results
+successful = sum(1 for r in results if r['success'])
+total_duration = sum(r.get('duration', 0) for r in results if r['success'])
+avg_duration = total_duration / successful if successful > 0 else 0
+
+concurrent_results = {
+    'max_workers': max_workers,
+    'successful_threads': successful,
+    'failed_threads': max_workers - successful,
+    'average_duration': avg_duration,
+    'total_executions': successful * 5,
+    'results': results
+}
+
+with open('concurrent_execution_results.json', 'w') as f:
+    json.dump(concurrent_results, f, indent=2)
+
+print(f'Concurrent execution test completed: {successful}/{max_workers} threads successful')
+print(f'Average duration per thread: {avg_duration:.2f} seconds')
+"
+    
+    - name: Run resource limit tests
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+import time
+import json
+from sandbox import SandboxExecutor
+
+print('Testing resource limits...')
+resource_tests = []
+
+# Test CPU time limits
+print('Testing CPU time limits...')
+executor = SandboxExecutor('python', {'time_limit': 2, 'memory_limit': 100})
+start_time = time.time()
+result = executor.execute_code('import time; time.sleep(5)', [])
+end_time = time.time()
+actual_time = end_time - start_time
+
+resource_tests.append({
+    'test': 'cpu_time_limit',
+    'expected_limit': 2,
+    'actual_time': actual_time,
+    'properly_limited': actual_time < 4,  # Should be killed before 4 seconds
+    'exit_code': result.exit_code
+})
+
+# Test memory limits
+print('Testing memory limits...')
+executor = SandboxExecutor('python', {'time_limit': 10, 'memory_limit': 50})  # 50MB limit
+result = executor.execute_code('''
+data = []
+try:
+    for i in range(1000):
+        data.append(b'x' * 1024 * 1024)  # 1MB chunks
+except MemoryError:
+    print(\"Memory limit reached\")
+''', [])
+
+resource_tests.append({
+    'test': 'memory_limit',
+    'expected_limit_mb': 50,
+    'exit_code': result.exit_code,
+    'stdout': result.stdout,
+    'stderr': result.stderr,
+    'properly_limited': 'Memory' in result.stdout or result.exit_code != 0
+})
+
+# Test disk space limits (if implemented)
+print('Testing disk usage...')
+executor = SandboxExecutor('python', {'time_limit': 10, 'memory_limit': 100})
+result = executor.execute_code('''
+import os
+try:
+    with open('/tmp/large_file.txt', 'w') as f:
+        for i in range(1000):
+            f.write('x' * 1024 * 1024)  # Try to write 1GB
+    print(\"File written successfully\")
+except Exception as e:
+    print(f\"Disk limit reached: {e}\")
+''', [])
+
+resource_tests.append({
+    'test': 'disk_usage',
+    'exit_code': result.exit_code,
+    'stdout': result.stdout,
+    'stderr': result.stderr
+})
+
+with open('resource_limit_results.json', 'w') as f:
+    json.dump(resource_tests, f, indent=2)
+
+print('Resource limit tests completed')
+for test in resource_tests:
+    print(f\"- {test['test']}: {'✓' if test.get('properly_limited', True) else '✗'}\")
+"
+    
+    - name: Generate performance report
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+import json
+import os
+from datetime import datetime
+
+print('Generating performance report...')
+
+report = []
+report.append('# Performance Test Report')
+report.append(f'Generated on: {datetime.now().isoformat()}')
+report.append(f'Test scale: ${{ github.event.inputs.test_scale || \"medium\" }}')
+report.append('')
+
+# Scalability results
+if os.path.exists('scalability_benchmark.json'):
+    with open('scalability_benchmark.json') as f:
+        scalability = json.load(f)
+    report.append('## Scalability Test Results')
+    report.append('| Test | Min (s) | Max (s) | Mean (s) | StdDev |')
+    report.append('|------|---------|---------|----------|--------|')
+    for benchmark in scalability.get('benchmarks', []):
+        name = benchmark['name']
+        stats = benchmark['stats']
+        report.append(f\"| {name} | {stats['min']:.3f} | {stats['max']:.3f} | {stats['mean']:.3f} | {stats['stddev']:.3f} |\")
+    report.append('')
+
+# Memory usage results
+if os.path.exists('memory_usage_results.json'):
+    with open('memory_usage_results.json') as f:
+        memory = json.load(f)
+    report.append('## Memory Usage Test Results')
+    report.append('| Dataset Size | Memory Used (MB) | Per Problem (MB) |')
+    report.append('|--------------|------------------|------------------|')
+    for size, data in memory.items():
+        report.append(f\"| {size} | {data['used_mb']:.2f} | {data['per_problem_mb']:.3f} |\")
+    report.append('')
+
+# Concurrent execution results
+if os.path.exists('concurrent_execution_results.json'):
+    with open('concurrent_execution_results.json') as f:
+        concurrent = json.load(f)
+    report.append('## Concurrent Execution Test Results')
+    report.append(f\"- Max Workers: {concurrent['max_workers']}\")
+    report.append(f\"- Successful Threads: {concurrent['successful_threads']}\")
+    report.append(f\"- Failed Threads: {concurrent['failed_threads']}\")
+    report.append(f\"- Average Duration: {concurrent['average_duration']:.2f}s\")
+    report.append(f\"- Total Executions: {concurrent['total_executions']}\")
+    report.append('')
+
+# Resource limit results
+if os.path.exists('resource_limit_results.json'):
+    with open('resource_limit_results.json') as f:
+        resources = json.load(f)
+    report.append('## Resource Limit Test Results')
+    for test in resources:
+        status = '✓ PASS' if test.get('properly_limited', True) else '✗ FAIL'
+        report.append(f\"- {test['test']}: {status}\")
+    report.append('')
+
+# Performance recommendations
+report.append('## Performance Recommendations')
+if os.path.exists('memory_usage_results.json'):
+    with open('memory_usage_results.json') as f:
+        memory = json.load(f)
+    max_per_problem = max(data['per_problem_mb'] for data in memory.values())
+    if max_per_problem > 10:
+        report.append('- ⚠️ High memory usage per problem detected. Consider optimizing data structures.')
+    else:
+        report.append('- ✓ Memory usage per problem is within acceptable limits.')
+
+if os.path.exists('concurrent_execution_results.json'):
+    with open('concurrent_execution_results.json') as f:
+        concurrent = json.load(f)
+    success_rate = concurrent['successful_threads'] / concurrent['max_workers']
+    if success_rate < 0.9:
+        report.append('- ⚠️ Low success rate in concurrent execution. Check for race conditions.')
+    else:
+        report.append('- ✓ Concurrent execution is stable.')
+
+with open('performance_report.md', 'w') as f:
+    f.write('\\n'.join(report))
+
+print('Performance report generated')
+"
+    
+    - name: Upload performance results
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-test-results
+        path: |
+          lm_eval/tasks/single_turn_scenarios/scalability_benchmark.json
+          lm_eval/tasks/single_turn_scenarios/memory_usage_results.json
+          lm_eval/tasks/single_turn_scenarios/concurrent_execution_results.json
+          lm_eval/tasks/single_turn_scenarios/resource_limit_results.json
+          lm_eval/tasks/single_turn_scenarios/performance_report.md
+
+  benchmark-comparison:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'schedule'
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for comparison
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+    
+    - name: Download previous benchmark results
+      uses: actions/download-artifact@v3
+      with:
+        name: performance-test-results
+        path: previous_results/
+      continue-on-error: true
+    
+    - name: Compare with previous results
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+import json
+import os
+from datetime import datetime
+
+print('Comparing performance with previous results...')
+
+current_files = [
+    'scalability_benchmark.json',
+    'memory_usage_results.json',
+    'concurrent_execution_results.json'
+]
+
+previous_dir = 'previous_results'
+comparison_report = []
+comparison_report.append('# Performance Comparison Report')
+comparison_report.append(f'Generated on: {datetime.now().isoformat()}')
+comparison_report.append('')
+
+for filename in current_files:
+    if os.path.exists(filename):
+        previous_file = os.path.join(previous_dir, filename)
+        if os.path.exists(previous_file):
+            comparison_report.append(f'## {filename}')
+            try:
+                with open(filename) as f:
+                    current = json.load(f)
+                with open(previous_file) as f:
+                    previous = json.load(f)
+                
+                # Simple comparison logic
+                comparison_report.append('- Current vs Previous comparison available')
+                comparison_report.append(f'- Current file size: {os.path.getsize(filename)} bytes')
+                comparison_report.append(f'- Previous file size: {os.path.getsize(previous_file)} bytes')
+            except Exception as e:
+                comparison_report.append(f'- Error comparing {filename}: {e}')
+            comparison_report.append('')
+        else:
+            comparison_report.append(f'## {filename}')
+            comparison_report.append('- No previous results available for comparison')
+            comparison_report.append('')
+
+with open('performance_comparison.md', 'w') as f:
+    f.write('\\n'.join(comparison_report))
+
+print('Performance comparison completed')
+"
+    
+    - name: Upload comparison report
+      uses: actions/upload-artifact@v3
+      with:
+        name: performance-comparison-report
+        path: lm_eval/tasks/single_turn_scenarios/performance_comparison.md

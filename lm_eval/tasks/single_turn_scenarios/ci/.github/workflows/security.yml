@@ -1,0 +1,310 @@
+name: Security Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'lm_eval/tasks/single_turn_scenarios/**'
+  schedule:
+    # Run weekly security scans on Sundays at 3 AM UTC
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+jobs:
+  sandbox-security-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+        pip install pytest pytest-timeout
+    
+    - name: Build security test Docker images
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios/docker
+        docker build -f python.Dockerfile -t sts-python .
+        docker build -f node.Dockerfile -t sts-node .
+        docker build -f java.Dockerfile -t sts-java .
+        docker build -f gcc.Dockerfile -t sts-gcc .
+    
+    - name: Run sandbox escape tests
+      timeout-minutes: 30
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -m pytest tests/security/test_sandbox_security.py -v --tb=short
+    
+    - name: Run timeout handling tests
+      timeout-minutes: 15
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -m pytest tests/security/test_timeout_handling.py -v --tb=short
+    
+    - name: Test malicious code detection
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+from sandbox import SandboxExecutor
+import tempfile
+import os
+
+# Test various malicious code patterns
+malicious_codes = [
+    # Network access attempt
+    '''
+import socket
+s = socket.socket()
+s.connect(('google.com', 80))
+''',
+    # File system access attempt
+    '''
+import os
+os.system('rm -rf /')
+''',
+    # Fork bomb attempt
+    '''
+import os
+while True:
+    os.fork()
+''',
+    # Memory exhaustion attempt
+    '''
+data = []
+while True:
+    data.append('x' * 1000000)
+''',
+]
+
+executor = SandboxExecutor('python', {'time_limit': 5, 'memory_limit': 100})
+for i, code in enumerate(malicious_codes):
+    print(f'Testing malicious code {i+1}...')
+    result = executor.execute_code(code, [])
+    assert result.exit_code != 0 or result.security_violations, f'Malicious code {i+1} was not blocked'
+    print(f'✓ Malicious code {i+1} properly blocked')
+
+print('All malicious code tests passed')
+"
+    
+    - name: Generate security report
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "# Security Validation Report" > security_report.md
+        echo "Generated on: $(date)" >> security_report.md
+        echo "" >> security_report.md
+        echo "## Sandbox Security Tests" >> security_report.md
+        python -m pytest tests/security/ --tb=no -q >> security_report.md 2>&1 || true
+        echo "" >> security_report.md
+        echo "## Security Audit Checklist" >> security_report.md
+        cat SECURITY_AUDIT_CHECKLIST.md >> security_report.md
+    
+    - name: Upload security report
+      uses: actions/upload-artifact@v3
+      with:
+        name: security-validation-report
+        path: lm_eval/tasks/single_turn_scenarios/security_report.md
+
+  dependency-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install security scanning tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety bandit semgrep pip-audit
+    
+    - name: Run pip-audit
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        pip-audit -r requirements.txt --format=json --output=pip-audit-report.json || true
+    
+    - name: Run safety check
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        safety check -r requirements.txt --json --output=safety-report.json || true
+    
+    - name: Run bandit security linter
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        bandit -r . -f json -o bandit-report.json || true
+    
+    - name: Run semgrep security analysis
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        semgrep --config=auto . --json --output=semgrep-report.json || true
+    
+    - name: Check for hardcoded secrets
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        # Check for potential API keys or secrets in code
+        grep -r -i "api[_-]key\|secret\|password\|token" . --include="*.py" --include="*.yaml" --include="*.json" || true
+        # Ensure no actual secrets are committed
+        ! grep -r "sk-\|pk-\|AKIA\|AIza" . --include="*.py" --include="*.yaml" --include="*.json" --include="*.md"
+    
+    - name: Upload security scan reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: dependency-security-reports
+        path: |
+          lm_eval/tasks/single_turn_scenarios/pip-audit-report.json
+          lm_eval/tasks/single_turn_scenarios/safety-report.json
+          lm_eval/tasks/single_turn_scenarios/bandit-report.json
+          lm_eval/tasks/single_turn_scenarios/semgrep-report.json
+
+  docker-security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Install Trivy
+      run: |
+        sudo apt-get update
+        sudo apt-get install wget apt-transport-https gnupg lsb-release
+        wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+        echo "deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main" | sudo tee -a /etc/apt/sources.list.d/trivy.list
+        sudo apt-get update
+        sudo apt-get install trivy
+    
+    - name: Build Docker images for security scanning
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios/docker
+        docker build -f python.Dockerfile -t sts-python .
+        docker build -f node.Dockerfile -t sts-node .
+        docker build -f java.Dockerfile -t sts-java .
+        docker build -f gcc.Dockerfile -t sts-gcc .
+        docker build -f go.Dockerfile -t sts-go .
+        docker build -f rust.Dockerfile -t sts-rust .
+    
+    - name: Scan Docker images for vulnerabilities
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        mkdir -p docker_security_reports
+        
+        for image in sts-python sts-node sts-java sts-gcc sts-go sts-rust; do
+          echo "Scanning $image..."
+          trivy image --format json --output docker_security_reports/${image}-scan.json $image || true
+        done
+    
+    - name: Generate Docker security summary
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "# Docker Security Scan Summary" > docker_security_summary.md
+        echo "Generated on: $(date)" >> docker_security_summary.md
+        echo "" >> docker_security_summary.md
+        
+        for report in docker_security_reports/*.json; do
+          if [ -f "$report" ]; then
+            image_name=$(basename "$report" -scan.json)
+            echo "## $image_name" >> docker_security_summary.md
+            # Extract high-level summary from Trivy JSON output
+            python -c "
+import json
+import sys
+try:
+    with open('$report') as f:
+        data = json.load(f)
+    if 'Results' in data:
+        for result in data['Results']:
+            if 'Vulnerabilities' in result:
+                vulns = result['Vulnerabilities'] or []
+                critical = sum(1 for v in vulns if v.get('Severity') == 'CRITICAL')
+                high = sum(1 for v in vulns if v.get('Severity') == 'HIGH')
+                medium = sum(1 for v in vulns if v.get('Severity') == 'MEDIUM')
+                low = sum(1 for v in vulns if v.get('Severity') == 'LOW')
+                print(f'- Critical: {critical}, High: {high}, Medium: {medium}, Low: {low}')
+except Exception as e:
+    print(f'- Error parsing report: {e}')
+" >> docker_security_summary.md
+            echo "" >> docker_security_summary.md
+          fi
+        done
+    
+    - name: Upload Docker security reports
+      uses: actions/upload-artifact@v3
+      with:
+        name: docker-security-reports
+        path: |
+          lm_eval/tasks/single_turn_scenarios/docker_security_reports/
+          lm_eval/tasks/single_turn_scenarios/docker_security_summary.md
+
+  compliance-check:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+    
+    - name: Run compliance checks
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python compliance_tracker.py --validate-all
+    
+    - name: Check licensing compliance
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+import json
+import sys
+
+# Check that all problems have proper licensing information
+with open('problems.jsonl') as f:
+    for line_num, line in enumerate(f, 1):
+        try:
+            problem = json.loads(line.strip())
+            if 'metadata' not in problem:
+                print(f'Line {line_num}: Missing metadata')
+                sys.exit(1)
+            if 'license' not in problem['metadata']:
+                print(f'Line {line_num}: Missing license in metadata')
+                sys.exit(1)
+            if 'author' not in problem['metadata']:
+                print(f'Line {line_num}: Missing author in metadata')
+                sys.exit(1)
+        except json.JSONDecodeError as e:
+            print(f'Line {line_num}: Invalid JSON - {e}')
+            sys.exit(1)
+
+print('✓ All problems have proper licensing information')
+"
+    
+    - name: Generate compliance report
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "# Compliance Check Report" > compliance_report.md
+        echo "Generated on: $(date)" >> compliance_report.md
+        echo "" >> compliance_report.md
+        python compliance_tracker.py --generate-report >> compliance_report.md
+    
+    - name: Upload compliance report
+      uses: actions/upload-artifact@v3
+      with:
+        name: compliance-report
+        path: lm_eval/tasks/single_turn_scenarios/compliance_report.md

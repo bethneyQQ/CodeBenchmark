@@ -1,0 +1,86 @@
+{
+  "results": {
+    "single_turn_scenarios_code_completion": {
+      "exact_match": 0.75,
+      "bleu_score": 0.68,
+      "codebleu_score": 0.72,
+      "syntax_validity": 0.95,
+      "pass_at_k": 0.80,
+      "runtime_correctness": 0.78,
+      "code_style_score": 0.85
+    }
+  },
+  "config": {
+    "model": "hf",
+    "model_args": {
+      "pretrained": "deepseek-ai/deepseek-coder-6.7b-instruct",
+      "device": "cuda:0"
+    },
+    "task": "single_turn_scenarios_code_completion",
+    "batch_size": 4,
+    "limit": null,
+    "output_path": "./results"
+  },
+  "samples": [
+    {
+      "id": "st_0001",
+      "title": "Reverse linked list",
+      "language": "python",
+      "scenario": "code_completion",
+      "difficulty": "intermediate",
+      "context_mode": "minimal_context",
+      "prediction": "def reverse_list(head):\n    prev = None\n    current = head\n    while current:\n        next_node = current.next\n        current.next = prev\n        prev = current\n        current = next_node\n    return prev",
+      "target": "def reverse_list(head):\n    prev = None\n    current = head\n    while current:\n        next_temp = current.next\n        current.next = prev\n        prev = current\n        current = next_temp\n    return prev",
+      "metrics": {
+        "exact_match": 0,
+        "bleu_score": 0.85,
+        "codebleu_score": 0.92,
+        "syntax_validity": 1,
+        "pass_at_k": 1,
+        "runtime_correctness": 1,
+        "code_style_score": 0.9
+      },
+      "execution_result": {
+        "stdout": "All tests passed",
+        "stderr": "",
+        "exit_code": 0,
+        "wall_time": 0.45,
+        "peak_memory_mb": 12
+      }
+    },
+    {
+      "id": "st_0002",
+      "title": "Binary search implementation",
+      "language": "python",
+      "scenario": "code_completion",
+      "difficulty": "simple",
+      "context_mode": "minimal_context",
+      "prediction": "def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1",
+      "target": "def binary_search(arr, target):\n    left, right = 0, len(arr) - 1\n    while left <= right:\n        mid = (left + right) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            left = mid + 1\n        else:\n            right = mid - 1\n    return -1",
+      "metrics": {
+        "exact_match": 1,
+        "bleu_score": 1.0,
+        "codebleu_score": 1.0,
+        "syntax_validity": 1,
+        "pass_at_k": 1,
+        "runtime_correctness": 1,
+        "code_style_score": 1.0
+      },
+      "execution_result": {
+        "stdout": "All tests passed",
+        "stderr": "",
+        "exit_code": 0,
+        "wall_time": 0.23,
+        "peak_memory_mb": 8
+      }
+    }
+  ],
+  "metadata": {
+    "version": "1.0",
+    "timestamp": "2025-09-25T15:30:00Z",
+    "total_samples": 2,
+    "successful_samples": 2,
+    "failed_samples": 0,
+    "evaluation_time_s": 45.2
+  }
+}

@@ -1,0 +1,65 @@
+# OpenAI Model Configuration for Single Turn Scenarios
+model_name: "gpt-4"
+model_type: "openai"
+
+endpoint_config:
+  base_url: "https://api.openai.com/v1"
+  timeout: 60
+  rate_limit: 15
+  max_retries: 3
+
+generation_params:
+  temperature: 0.0
+  max_tokens: 1536
+  top_p: 0.95
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+  stop: []
+
+batch_config:
+  batch_size: 6
+  max_batch_size: 20
+  parallel_requests: true
+
+tokenizer_config:
+  encoding: "cl100k_base"
+  max_context: 128000
+  context_window: 128000
+
+optimization:
+  use_caching: true
+  cache_ttl: 3600
+  enable_streaming: false
+  stability_focused: true
+
+scenario_specific:
+  code_completion:
+    max_tokens: 512
+    temperature: 0.0
+  bug_fix:
+    max_tokens: 768
+    temperature: 0.0
+  algorithm_implementation:
+    max_tokens: 1024
+    temperature: 0.1
+  system_design:
+    max_tokens: 1536
+    temperature: 0.2
+  documentation:
+    max_tokens: 1024
+    temperature: 0.1
+
+features:
+  stability: true
+  compatibility: true
+  reliable_api: true
+  consistent_output: true
+  multi_language_support: true
+
+metadata:
+  version: "1.0"
+  description: "Stable and compatible configuration for OpenAI models with reliability focus"
+  supported_languages: ["python", "javascript", "typescript", "java", "cpp", "go", "rust"]
+  best_for: ["documentation", "code_translation", "function_generation", "testing_strategy"]
+  reliability: "high"
+  api_stability: "excellent"

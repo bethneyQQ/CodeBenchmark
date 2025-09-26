@@ -1,0 +1,57 @@
+task: single_turn_scenarios_database_design
+dataset_kwargs:
+  metadata:
+    scenario: "database_design"
+custom_dataset: !function utils.load_dataset
+
+test_split: test
+output_type: generate_until
+process_docs: !function utils.process_docs
+doc_to_text: !function utils.doc_to_text
+doc_to_target: !function utils.doc_to_target
+
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.bleu_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.codebleu_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.syntax_validity
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.pass_at_k
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.design_implementation_alignment
+    aggregation: mean
+    higher_is_better: true
+
+generation_kwargs:
+  temperature: 0.0
+  max_gen_toks: 1024
+  until: []
+  do_sample: false
+
+filter_list:
+  - name: "extract_code"
+    filter:
+      - function: "custom"
+        filter_fn: !function utils.extract_code_response
+
+repeats: 1
+num_fewshot: 0
+
+tag:
+  - single_turn_scenarios
+  - database_design
+  - advanced_scenario
+
+metadata:
+  version: 1.0
+  scenario: "database_design"
+  description: "Database design tasks requiring schema design and query optimization"
+  supported_languages: ["sql", "python", "javascript", "java", "cpp", "go", "rust"]

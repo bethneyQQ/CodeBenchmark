@@ -1,0 +1,18 @@
+{
+  "no_context": {
+    "template": "{{prompt}}",
+    "description": "Pure problem with no additional context"
+  },
+  "minimal_context": {
+    "template": "{{prompt}}\n\nRequirements:\n{{requirements}}",
+    "description": "Basic constraints and requirements"
+  },
+  "full_context": {
+    "template": "Company Standards:\n{{company_standards}}\n\nProblem:\n{{prompt}}\n\nBest Practices:\n{{best_practices}}",
+    "description": "Complete company standards and best practices"
+  },
+  "domain_context": {
+    "template": "Domain: {{domain}}\n\nSpecialist Requirements:\n{{domain_requirements}}\n\nProblem:\n{{prompt}}",
+    "description": "Domain-specific professional requirements"
+  }
+}

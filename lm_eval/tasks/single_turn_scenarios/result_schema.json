@@ -1,0 +1,281 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://lm-eval.org/schemas/single-turn-scenarios-result.json",
+  "title": "Single Turn Scenarios Result Schema",
+  "description": "JSON schema for validating single turn scenarios evaluation results",
+  "type": "object",
+  "required": [
+    "id",
+    "model", 
+    "config",
+    "prediction",
+    "metrics",
+    "runtime",
+    "seed",
+    "commit",
+    "requirements",
+    "timestamp"
+  ],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^st_[0-9]{4}$",
+      "description": "Problem identifier in format st_XXXX"
+    },
+    "model": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Model name and version"
+    },
+    "config": {
+      "type": "string",
+      "description": "Configuration string in format context_mode|parameters"
+    },
+    "prediction": {
+      "type": "string",
+      "description": "Model's generated code/response"
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "exact_match",
+        "codebleu", 
+        "pass_at_1",
+        "syntax_valid"
+      ],
+      "properties": {
+        "exact_match": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Exact string match score (0-1)"
+        },
+        "bleu_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "BLEU score for text similarity (0-1)"
+        },
+        "codebleu": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "CodeBLEU score for code similarity (0-1)"
+        },
+        "rouge_l": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "ROUGE-L score for sequence similarity (0-1)"
+        },
+        "edit_distance": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Normalized edit distance score (0-1)"
+        },
+        "syntax_valid": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Syntax validity score (0=invalid, 1=valid)"
+        },
+        "cyclomatic_complexity": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Cyclomatic complexity measure (>=0)"
+        },
+        "security_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Security assessment score (0-1)"
+        },
+        "performance_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Performance assessment score (0-1)"
+        },
+        "code_style_score": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Code style assessment score (0-1)"
+        },
+        "pass_at_1": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Pass@1 functional correctness score (0-1)"
+        },
+        "pass_at_5": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Pass@5 functional correctness score (0-1)"
+        },
+        "pass_at_10": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Pass@10 functional correctness score (0-1)"
+        },
+        "test_coverage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Test coverage score (0-1)"
+        },
+        "runtime_correctness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Runtime correctness score (0-1)"
+        },
+        "memory_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Memory efficiency score (0-1)"
+        },
+        "phase_coherence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Phase coherence for complex scenarios (0-1)"
+        },
+        "design_implementation_alignment": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Design-implementation alignment score (0-1)"
+        },
+        "information_flow": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Information flow consistency score (0-1)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "runtime": {
+      "type": "object",
+      "required": [
+        "time_s",
+        "exit_code",
+        "peak_memory_mb"
+      ],
+      "properties": {
+        "time_s": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Execution time in seconds"
+        },
+        "exit_code": {
+          "type": "integer",
+          "description": "Process exit code"
+        },
+        "peak_memory_mb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Peak memory usage in megabytes"
+        },
+        "cpu_usage_percent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "CPU usage percentage"
+        },
+        "security_violations": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of detected security violations"
+        }
+      },
+      "additionalProperties": false
+    },
+    "seed": {
+      "type": "integer",
+      "description": "Random seed used for evaluation"
+    },
+    "commit": {
+      "type": "string",
+      "description": "Git commit hash of evaluation code"
+    },
+    "requirements": {
+      "type": "string",
+      "description": "Requirements file hash or version"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evaluation"
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "code_completion",
+            "bug_fix", 
+            "code_translation",
+            "documentation",
+            "function_generation",
+            "system_design",
+            "algorithm_implementation",
+            "api_design",
+            "database_design",
+            "performance_optimization",
+            "full_stack",
+            "testing_strategy",
+            "security"
+          ],
+          "description": "Scenario type"
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "intermediate", 
+            "complex"
+          ],
+          "description": "Problem difficulty level"
+        },
+        "language": {
+          "type": "string",
+          "enum": [
+            "python",
+            "javascript",
+            "typescript",
+            "java",
+            "cpp",
+            "go",
+            "rust"
+          ],
+          "description": "Programming language"
+        },
+        "context_mode": {
+          "type": "string",
+          "enum": [
+            "no_context",
+            "minimal_context",
+            "full_context",
+            "domain_context"
+          ],
+          "description": "Context configuration mode"
+        },
+        "evaluation_version": {
+          "type": "string",
+          "description": "Version of evaluation framework"
+        }
+      },
+      "additionalProperties": true
+    }
+  },
+  "additionalProperties": false
+}

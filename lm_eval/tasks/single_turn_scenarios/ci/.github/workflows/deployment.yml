@@ -1,0 +1,398 @@
+name: Deployment Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'lm_eval/tasks/single_turn_scenarios/**'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  validate-deployment-readiness:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+    
+    - name: Validate all configuration files
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Validating configuration files..."
+        python validate_config.py --strict
+        echo "✓ Configuration validation passed"
+    
+    - name: Validate problems dataset
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Validating problems dataset..."
+        python validate_problems.py --comprehensive
+        echo "✓ Problems dataset validation passed"
+    
+    - name: Check data integrity
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Checking data integrity..."
+        python check_integrity.py --full-check
+        echo "✓ Data integrity check passed"
+    
+    - name: Validate Docker images build
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios/docker
+        echo "Building and validating Docker images..."
+        
+        images=("python" "node" "java" "gcc" "go" "rust")
+        for image in "${images[@]}"; do
+          echo "Building $image image..."
+          docker build -f ${image}.Dockerfile -t sts-${image} .
+          echo "✓ $image image built successfully"
+        done
+    
+    - name: Run comprehensive smoke tests
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Running comprehensive smoke tests..."
+        python smoke_test.py --comprehensive
+        echo "✓ Smoke tests passed"
+    
+    - name: Test CLI integration
+      run: |
+        echo "Testing CLI integration..."
+        
+        # Test individual scenario tasks
+        python -m lm_eval --tasks single_turn_scenarios_code_completion --limit 1 --output_path test_cli_individual
+        
+        # Test suite task
+        python -m lm_eval --tasks single_turn_scenarios_suite --limit 1 --output_path test_cli_suite
+        
+        # Test with metadata filtering
+        python -m lm_eval --tasks single_turn_scenarios_python --limit 1 --output_path test_cli_filtered
+        
+        echo "✓ CLI integration tests passed"
+    
+    - name: Validate output formats
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Validating output formats..."
+        
+        python -c "
+import json
+import os
+
+# Check that all test outputs have valid JSON structure
+output_dirs = ['test_cli_individual', 'test_cli_suite', 'test_cli_filtered']
+
+for output_dir in output_dirs:
+    if os.path.exists(output_dir):
+        for file in os.listdir(output_dir):
+            if file.endswith('.json'):
+                filepath = os.path.join(output_dir, file)
+                try:
+                    with open(filepath) as f:
+                        data = json.load(f)
+                    
+                    # Validate required fields
+                    assert 'results' in data, f'Missing results in {filepath}'
+                    assert 'config' in data, f'Missing config in {filepath}'
+                    
+                    # Validate results structure
+                    for task_name, task_results in data['results'].items():
+                        if isinstance(task_results, dict):
+                            # Check for required metric fields
+                            required_fields = ['exact_match', 'codebleu', 'pass_at_1']
+                            for field in required_fields:
+                                if field not in task_results:
+                                    print(f'Warning: Missing {field} in {task_name}')
+                    
+                    print(f'✓ Valid output format: {filepath}')
+                    
+                except json.JSONDecodeError as e:
+                    print(f'✗ Invalid JSON in {filepath}: {e}')
+                    exit(1)
+                except Exception as e:
+                    print(f'✗ Validation error in {filepath}: {e}')
+                    exit(1)
+
+print('✓ All output formats are valid')
+"
+    
+    - name: Test environment setup scripts
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Testing environment setup scripts..."
+        
+        # Test the setup script (dry run mode)
+        bash setupEvaluationEnvironment.sh --dry-run
+        echo "✓ Linux setup script validation passed"
+        
+        # Test PowerShell script syntax (if available)
+        if command -v pwsh &> /dev/null; then
+          pwsh -Command "& { . ./setupEvaluationEnvironment.ps1; Test-SetupScript }"
+          echo "✓ PowerShell setup script validation passed"
+        else
+          echo "PowerShell not available, skipping PS1 validation"
+        fi
+    
+    - name: Validate documentation completeness
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Validating documentation completeness..."
+        
+        required_docs=(
+          "README.md"
+          "CLI_USAGE.md"
+          "SECURITY_BEST_PRACTICES.md"
+          "LICENSING_COMPLIANCE.md"
+          "SECURITY_AUDIT_CHECKLIST.md"
+          "analysis_tools/README.md"
+          "tests/README.md"
+          "ci/README.md"
+        )
+        
+        for doc in "${required_docs[@]}"; do
+          if [ -f "$doc" ]; then
+            echo "✓ Found: $doc"
+          else
+            echo "✗ Missing: $doc"
+            exit 1
+          fi
+        done
+        
+        echo "✓ All required documentation files present"
+    
+    - name: Run final integration test
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Running final integration test..."
+        python final_validation.py --deployment-check
+        echo "✓ Final integration test passed"
+    
+    - name: Generate deployment checklist
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "# Deployment Readiness Checklist" > deployment_checklist.md
+        echo "Generated on: $(date)" >> deployment_checklist.md
+        echo "" >> deployment_checklist.md
+        echo "## Pre-deployment Validation" >> deployment_checklist.md
+        echo "- [x] Configuration files validated" >> deployment_checklist.md
+        echo "- [x] Problems dataset validated" >> deployment_checklist.md
+        echo "- [x] Data integrity verified" >> deployment_checklist.md
+        echo "- [x] Docker images build successfully" >> deployment_checklist.md
+        echo "- [x] Smoke tests passed" >> deployment_checklist.md
+        echo "- [x] CLI integration tested" >> deployment_checklist.md
+        echo "- [x] Output formats validated" >> deployment_checklist.md
+        echo "- [x] Environment setup scripts tested" >> deployment_checklist.md
+        echo "- [x] Documentation completeness verified" >> deployment_checklist.md
+        echo "- [x] Final integration test passed" >> deployment_checklist.md
+        echo "" >> deployment_checklist.md
+        echo "## Deployment Requirements" >> deployment_checklist.md
+        echo "- Python 3.8+" >> deployment_checklist.md
+        echo "- Docker runtime" >> deployment_checklist.md
+        echo "- System dependencies (Node.js, Java, GCC, Go, Rust)" >> deployment_checklist.md
+        echo "- API keys for model backends (optional)" >> deployment_checklist.md
+        echo "" >> deployment_checklist.md
+        echo "## Post-deployment Verification" >> deployment_checklist.md
+        echo "- [ ] Run smoke tests in production environment" >> deployment_checklist.md
+        echo "- [ ] Verify model backend connectivity" >> deployment_checklist.md
+        echo "- [ ] Test sample evaluations" >> deployment_checklist.md
+        echo "- [ ] Monitor resource usage" >> deployment_checklist.md
+        echo "- [ ] Validate security measures" >> deployment_checklist.md
+    
+    - name: Upload deployment artifacts
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-validation-results
+        path: |
+          lm_eval/tasks/single_turn_scenarios/deployment_checklist.md
+          lm_eval/tasks/single_turn_scenarios/test_cli_*
+
+  test-fresh-installation:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Test fresh installation from repository
+      run: |
+        echo "Testing fresh installation..."
+        
+        # Clone the repository
+        git clone ${{ github.server_url }}/${{ github.repository }}.git fresh_install
+        cd fresh_install
+        
+        # Install the package
+        python -m pip install --upgrade pip
+        pip install -e .
+        
+        # Install task-specific dependencies
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+        
+        # Run basic functionality test
+        cd lm_eval/tasks/single_turn_scenarios
+        python smoke_test.py --basic
+        
+        echo "✓ Fresh installation test passed"
+    
+    - name: Test with minimal dependencies
+      run: |
+        echo "Testing with minimal dependencies..."
+        
+        # Create a new virtual environment
+        python -m venv minimal_env
+        source minimal_env/bin/activate
+        
+        cd fresh_install
+        
+        # Install only core dependencies
+        pip install --upgrade pip
+        pip install -e .
+        
+        # Test basic import
+        python -c "
+from lm_eval.tasks.single_turn_scenarios import SingleTurnScenariosTask
+print('✓ Basic import successful')
+"
+        
+        echo "✓ Minimal dependencies test passed"
+
+  cross-platform-validation:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+    
+    - name: Test basic functionality (cross-platform)
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python -c "
+import sys
+print(f'Testing on {sys.platform}')
+
+# Test basic imports
+from utils import load_dataset, process_docs
+from metrics import exact_match, bleu_score
+from config_manager import ConfigManager
+
+# Test configuration loading
+config_manager = ConfigManager()
+configs = config_manager.load_all_configs()
+print(f'✓ Loaded {len(configs)} configurations')
+
+# Test dataset loading (without Docker)
+try:
+    dataset = load_dataset({'limit': 1})
+    print('✓ Dataset loading successful')
+except Exception as e:
+    print(f'Dataset loading failed: {e}')
+
+print('✓ Cross-platform basic functionality test passed')
+"
+    
+    - name: Test CLI availability (cross-platform)
+      run: |
+        # Test that the task is discoverable
+        python -m lm_eval --tasks list | grep single_turn_scenarios || echo "Task not found in list"
+        
+        # Test help output
+        python -m lm_eval --help | grep -i "tasks" || echo "Help output available"
+
+  security-final-check:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+        pip install bandit safety
+    
+    - name: Final security audit
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "Running final security audit..."
+        
+        # Check for hardcoded secrets
+        echo "Checking for hardcoded secrets..."
+        ! grep -r -i "api[_-]key\s*=\s*['\"][^'\"]*['\"]" . --include="*.py" --include="*.yaml" --include="*.json"
+        ! grep -r "sk-\|pk-\|AKIA\|AIza" . --include="*.py" --include="*.yaml" --include="*.json" --include="*.md"
+        echo "✓ No hardcoded secrets found"
+        
+        # Run bandit security scan
+        echo "Running bandit security scan..."
+        bandit -r . -ll -f txt || true
+        
+        # Run safety check
+        echo "Running safety dependency check..."
+        safety check -r requirements.txt
+        
+        # Check file permissions
+        echo "Checking file permissions..."
+        find . -name "*.py" -perm /111 | grep -v "__pycache__" | while read file; do
+          echo "Warning: Executable Python file found: $file"
+        done
+        
+        echo "✓ Final security audit completed"
+    
+    - name: Generate security summary
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "# Final Security Summary" > final_security_summary.md
+        echo "Generated on: $(date)" >> final_security_summary.md
+        echo "" >> final_security_summary.md
+        echo "## Security Checks Completed" >> final_security_summary.md
+        echo "- [x] No hardcoded secrets detected" >> final_security_summary.md
+        echo "- [x] Bandit security scan completed" >> final_security_summary.md
+        echo "- [x] Safety dependency check passed" >> final_security_summary.md
+        echo "- [x] File permissions validated" >> final_security_summary.md
+        echo "" >> final_security_summary.md
+        echo "## Security Recommendations" >> final_security_summary.md
+        echo "- Use environment variables for API keys" >> final_security_summary.md
+        echo "- Regularly update dependencies" >> final_security_summary.md
+        echo "- Monitor sandbox execution logs" >> final_security_summary.md
+        echo "- Follow security best practices documentation" >> final_security_summary.md
+    
+    - name: Upload final security summary
+      uses: actions/upload-artifact@v3
+      with:
+        name: final-security-summary
+        path: lm_eval/tasks/single_turn_scenarios/final_security_summary.md

@@ -1,0 +1,97 @@
+{
+  "results": {
+    "single_turn_scenarios_suite": {
+      "exact_match": 0.68,
+      "bleu_score": 0.72,
+      "codebleu_score": 0.75,
+      "syntax_validity": 0.92,
+      "pass_at_k": 0.74,
+      "runtime_correctness": 0.71,
+      "code_style_score": 0.78,
+      "security_score": 0.85,
+      "performance_score": 0.69,
+      "design_implementation_alignment": 0.66
+    },
+    "single_turn_scenarios_code_completion": {
+      "exact_match": 0.75,
+      "bleu_score": 0.68,
+      "codebleu_score": 0.72,
+      "syntax_validity": 0.95,
+      "pass_at_k": 0.80
+    },
+    "single_turn_scenarios_bug_fix": {
+      "exact_match": 0.62,
+      "bleu_score": 0.71,
+      "codebleu_score": 0.74,
+      "syntax_validity": 0.89,
+      "pass_at_k": 0.68
+    },
+    "single_turn_scenarios_algorithm_implementation": {
+      "exact_match": 0.58,
+      "bleu_score": 0.69,
+      "codebleu_score": 0.73,
+      "syntax_validity": 0.91,
+      "pass_at_k": 0.65
+    },
+    "single_turn_scenarios_system_design": {
+      "exact_match": 0.45,
+      "bleu_score": 0.78,
+      "codebleu_score": 0.71,
+      "syntax_validity": 0.88,
+      "design_implementation_alignment": 0.72
+    },
+    "single_turn_scenarios_security": {
+      "exact_match": 0.52,
+      "bleu_score": 0.74,
+      "codebleu_score": 0.69,
+      "syntax_validity": 0.93,
+      "security_score": 0.85
+    }
+  },
+  "config": {
+    "model": "hf",
+    "model_args": {
+      "pretrained": "deepseek-ai/deepseek-coder-6.7b-instruct",
+      "device": "cuda:0"
+    },
+    "task": "single_turn_scenarios_suite",
+    "batch_size": 4,
+    "limit": null,
+    "output_path": "./results"
+  },
+  "metadata": {
+    "version": "1.0",
+    "timestamp": "2025-09-25T15:30:00Z",
+    "total_samples": 156,
+    "successful_samples": 143,
+    "failed_samples": 13,
+    "evaluation_time_s": 1847.3,
+    "scenarios_evaluated": [
+      "code_completion",
+      "bug_fix", 
+      "code_translation",
+      "documentation",
+      "function_generation",
+      "system_design",
+      "algorithm_implementation",
+      "api_design",
+      "database_design",
+      "performance_optimization",
+      "full_stack",
+      "testing_strategy",
+      "security"
+    ],
+    "languages_evaluated": ["python", "javascript", "java", "cpp", "go"],
+    "difficulty_distribution": {
+      "simple": 52,
+      "intermediate": 68,
+      "complex": 36
+    },
+    "context_mode_distribution": {
+      "no_context": 39,
+      "minimal_context": 39,
+      "full_context": 39,
+      "domain_context": 39
+    }
+  }
+}

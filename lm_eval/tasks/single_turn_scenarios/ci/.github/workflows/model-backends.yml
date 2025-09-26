@@ -1,0 +1,183 @@
+name: Model Backend Testing
+
+on:
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+    inputs:
+      test_all_models:
+        description: 'Test all model backends'
+        required: false
+        default: 'true'
+        type: boolean
+
+jobs:
+  test-model-backends:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        model: [claude_code, deepseek, openai, anthropic, universal]
+      fail-fast: false
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Set up Docker
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+    
+    - name: Build Docker images
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios/docker
+        docker build -f python.Dockerfile -t sts-python .
+        docker build -f node.Dockerfile -t sts-node .
+    
+    - name: Test Claude Code backend
+      if: matrix.model == 'claude_code'
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        if [ -n "$ANTHROPIC_API_KEY" ]; then
+          python -m lm_eval --model anthropic \
+            --model_args model=claude-3-sonnet-20240229 \
+            --tasks single_turn_scenarios_code_completion \
+            --limit 2 \
+            --output_path test_claude_output
+        else
+          echo "ANTHROPIC_API_KEY not available, skipping Claude test"
+        fi
+    
+    - name: Test DeepSeek backend
+      if: matrix.model == 'deepseek'
+      env:
+        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        if [ -n "$DEEPSEEK_API_KEY" ]; then
+          python -m lm_eval --model openai-completions \
+            --model_args base_url=https://api.deepseek.com,model=deepseek-coder \
+            --tasks single_turn_scenarios_code_completion \
+            --limit 2 \
+            --output_path test_deepseek_output
+        else
+          echo "DEEPSEEK_API_KEY not available, skipping DeepSeek test"
+        fi
+    
+    - name: Test OpenAI backend
+      if: matrix.model == 'openai'
+      env:
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        if [ -n "$OPENAI_API_KEY" ]; then
+          python -m lm_eval --model openai-completions \
+            --model_args model=gpt-3.5-turbo-instruct \
+            --tasks single_turn_scenarios_code_completion \
+            --limit 2 \
+            --output_path test_openai_output
+        else
+          echo "OPENAI_API_KEY not available, skipping OpenAI test"
+        fi
+    
+    - name: Test Anthropic backend
+      if: matrix.model == 'anthropic'
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        if [ -n "$ANTHROPIC_API_KEY" ]; then
+          python -m lm_eval --model anthropic \
+            --model_args model=claude-3-haiku-20240307 \
+            --tasks single_turn_scenarios_bug_fix \
+            --limit 2 \
+            --output_path test_anthropic_output
+        else
+          echo "ANTHROPIC_API_KEY not available, skipping Anthropic test"
+        fi
+    
+    - name: Test Universal backend (with local model)
+      if: matrix.model == 'universal'
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        # Test with a mock/dummy model for universal configuration
+        python smoke_test.py --test-universal-config
+    
+    - name: Validate model outputs
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        # Check that output files were created and have valid structure
+        for output_dir in test_*_output; do
+          if [ -d "$output_dir" ]; then
+            echo "Validating output in $output_dir"
+            python -c "
+import json
+import os
+import sys
+output_dir = '$output_dir'
+if os.path.exists(output_dir):
+    for file in os.listdir(output_dir):
+        if file.endswith('.json'):
+            with open(os.path.join(output_dir, file)) as f:
+                data = json.load(f)
+                assert 'results' in data, 'Missing results key'
+                print(f'✓ Valid output in {file}')
+"
+          fi
+        done
+    
+    - name: Upload test outputs
+      uses: actions/upload-artifact@v3
+      with:
+        name: model-test-outputs-${{ matrix.model }}
+        path: lm_eval/tasks/single_turn_scenarios/test_*_output/
+
+  api-connectivity-test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -e .
+        pip install -r lm_eval/tasks/single_turn_scenarios/requirements.txt
+    
+    - name: Test API connectivity
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+        DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        python check_api_keys.py --test-connectivity
+    
+    - name: Generate connectivity report
+      run: |
+        cd lm_eval/tasks/single_turn_scenarios
+        echo "# API Connectivity Report" > connectivity_report.md
+        echo "Generated on: $(date)" >> connectivity_report.md
+        echo "" >> connectivity_report.md
+        python check_api_keys.py --generate-report >> connectivity_report.md
+    
+    - name: Upload connectivity report
+      uses: actions/upload-artifact@v3
+      with:
+        name: api-connectivity-report
+        path: lm_eval/tasks/single_turn_scenarios/connectivity_report.md

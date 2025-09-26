@@ -1,0 +1,246 @@
+# CI/CD Configuration for Single Turn Scenarios
+# This file defines the comprehensive CI/CD pipeline configuration
+
+version: "1.0"
+
+# Environment Configuration
+environments:
+  development:
+    python_versions: ["3.8", "3.9", "3.10", "3.11"]
+    operating_systems: ["ubuntu-latest", "windows-latest", "macos-latest"]
+    docker_required: true
+    
+  staging:
+    python_versions: ["3.9", "3.10", "3.11"]
+    operating_systems: ["ubuntu-latest"]
+    docker_required: true
+    
+  production:
+    python_versions: ["3.10", "3.11"]
+    operating_systems: ["ubuntu-latest"]
+    docker_required: true
+
+# Test Configuration
+test_suites:
+  unit_tests:
+    path: "tests/unit/"
+    timeout_minutes: 15
+    coverage_threshold: 80
+    parallel: true
+    
+  integration_tests:
+    path: "tests/integration/"
+    timeout_minutes: 30
+    requires_docker: true
+    parallel: false
+    
+  security_tests:
+    path: "tests/security/"
+    timeout_minutes: 45
+    requires_docker: true
+    parallel: false
+    
+  performance_tests:
+    path: "tests/performance/"
+    timeout_minutes: 60
+    requires_docker: true
+    parallel: false
+    schedule: "weekly"
+
+# Security Configuration
+security:
+  dependency_scanning:
+    tools: ["safety", "bandit", "semgrep", "pip-audit"]
+    fail_on_high: true
+    fail_on_critical: true
+    
+  container_scanning:
+    tool: "trivy"
+    scan_all_images: true
+    fail_on_critical: true
+    
+  secret_scanning:
+    patterns:
+      - "api[_-]key"
+      - "secret"
+      - "password"
+      - "token"
+      - "sk-"
+      - "pk-"
+      - "AKIA"
+      - "AIza"
+    exclude_files:
+      - "*.md"
+      - "*.txt"
+      - ".env.template"
+
+# Model Backend Testing
+model_backends:
+  claude_code:
+    api_key_secret: "ANTHROPIC_API_KEY"
+    test_model: "claude-3-sonnet-20240229"
+    test_tasks: ["single_turn_scenarios_code_completion"]
+    
+  deepseek:
+    api_key_secret: "DEEPSEEK_API_KEY"
+    base_url: "https://api.deepseek.com"
+    test_model: "deepseek-coder"
+    test_tasks: ["single_turn_scenarios_code_completion"]
+    
+  openai:
+    api_key_secret: "OPENAI_API_KEY"
+    test_model: "gpt-3.5-turbo-instruct"
+    test_tasks: ["single_turn_scenarios_code_completion"]
+    
+  anthropic:
+    api_key_secret: "ANTHROPIC_API_KEY"
+    test_model: "claude-3-haiku-20240307"
+    test_tasks: ["single_turn_scenarios_bug_fix"]
+    
+  universal:
+    test_mode: "mock"
+    test_tasks: ["single_turn_scenarios_code_completion"]
+
+# Docker Configuration
+docker:
+  images:
+    - name: "sts-python"
+      dockerfile: "docker/python.Dockerfile"
+      required: true
+      
+    - name: "sts-node"
+      dockerfile: "docker/node.Dockerfile"
+      required: true
+      
+    - name: "sts-java"
+      dockerfile: "docker/java.Dockerfile"
+      required: true
+      
+    - name: "sts-gcc"
+      dockerfile: "docker/gcc.Dockerfile"
+      required: true
+      
+    - name: "sts-go"
+      dockerfile: "docker/go.Dockerfile"
+      required: false
+      
+    - name: "sts-rust"
+      dockerfile: "docker/rust.Dockerfile"
+      required: false
+
+# Quality Gates
+quality_gates:
+  code_coverage:
+    minimum: 80
+    target: 90
+    
+  test_success_rate:
+    minimum: 95
+    target: 100
+    
+  security_score:
+    minimum: 8.0
+    target: 10.0
+    
+  performance_regression:
+    maximum_degradation: 10  # percent
+    
+  documentation_coverage:
+    minimum: 90
+
+# Notification Configuration
+notifications:
+  on_failure:
+    - type: "github_issue"
+      labels: ["bug", "ci-failure"]
+      
+  on_security_issue:
+    - type: "github_issue"
+      labels: ["security", "urgent"]
+      assignees: ["security-team"]
+      
+  on_performance_regression:
+    - type: "github_issue"
+      labels: ["performance", "regression"]
+
+# Artifact Configuration
+artifacts:
+  test_results:
+    retention_days: 30
+    include:
+      - "**/*_results.json"
+      - "**/*_report.md"
+      - "coverage.xml"
+      
+  security_reports:
+    retention_days: 90
+    include:
+      - "**/*security*.json"
+      - "**/*security*.md"
+      
+  performance_reports:
+    retention_days: 180
+    include:
+      - "**/*performance*.json"
+      - "**/*benchmark*.json"
+      - "**/*performance*.md"
+
+# Deployment Configuration
+deployment:
+  validation_steps:
+    - "validate_config"
+    - "validate_problems"
+    - "check_integrity"
+    - "build_docker_images"
+    - "run_smoke_tests"
+    - "test_cli_integration"
+    - "validate_output_formats"
+    - "test_environment_setup"
+    - "validate_documentation"
+    - "run_final_integration_test"
+    
+  rollback_triggers:
+    - "test_failure_rate > 5%"
+    - "security_vulnerability_critical"
+    - "performance_degradation > 20%"
+
+# Monitoring Configuration
+monitoring:
+  metrics:
+    - name: "test_execution_time"
+      threshold: 300  # seconds
+      
+    - name: "memory_usage"
+      threshold: 2048  # MB
+      
+    - name: "docker_build_time"
+      threshold: 600  # seconds
+      
+    - name: "api_response_time"
+      threshold: 30  # seconds
+      
+  alerts:
+    - condition: "test_failure_rate > 10%"
+      severity: "high"
+      
+    - condition: "security_scan_failed"
+      severity: "critical"
+      
+    - condition: "performance_regression > 15%"
+      severity: "medium"
+
+# Compliance Configuration
+compliance:
+  required_checks:
+    - "licensing_validation"
+    - "security_audit"
+    - "dependency_audit"
+    - "data_privacy_check"
+    
+  reporting:
+    format: "json"
+    include_remediation: true
+    
+  retention:
+    audit_logs: 365  # days
+    compliance_reports: 1095  # days (3 years)

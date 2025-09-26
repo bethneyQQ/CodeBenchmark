@@ -1,0 +1,195 @@
+# DashScope Model Configuration
+# Alibaba Cloud's DashScope service with Qwen series models
+
+model_name: "dashscope"
+model_type: "dashscope"
+description: "Alibaba Cloud DashScope service with Qwen code-optimized models"
+
+# Generation parameters
+generation_params:
+  model: "qwen-coder-plus"  # Default model, can be overridden
+  temperature: 0.0
+  max_tokens: 2048
+  top_p: 0.95
+  repetition_penalty: 1.1
+  stop: ["```", "\n\n\n", "# End of code", "// End of code"]
+  stream: false
+
+# API configuration
+api_config:
+  api_key_env: "DASHSCOPE_API_KEY"
+  base_url: "https://dashscope.aliyuncs.com/api/v1"
+  timeout: 60
+  retry_attempts: 3
+  retry_delay: 1
+  max_concurrent_requests: 10
+
+# Context configuration
+context_config:
+  max_context_length: 8192
+  use_system_messages: true
+  
+  # System prompts for different context modes
+  system_prompts:
+    no_context: "You are a professional code generation assistant. Generate only the requested code without additional explanations."
+    minimal_context: "You are a code generation assistant. Generate code based on given requirements with necessary comments. Ensure code is concise and correct."
+    full_context: "You are an advanced code generation assistant. Generate production-ready code with complete error handling, detailed documentation and best practices. Code should be readable and maintainable."
+    domain_context: "You are an enterprise-level code generation expert. Generate high-quality code that meets enterprise standards, follows industry norms, security standards and domain-specific requirements."
+
+  # Prompt templates for different scenarios
+  prompt_templates:
+    code_completion: |
+      Complete the following code implementation:
+
+      Problem Description: {problem_statement}
+
+      Requirements:
+      {requirements}
+
+      Code to complete:
+      ```{language}
+      {partial_code}
+      ```
+
+      Please provide the complete code implementation:
+
+    bug_fix: |
+      Fix the bug in the following code:
+
+      Problem Description: {problem_description}
+
+      Buggy code:
+      ```{language}
+      {buggy_code}
+      ```
+
+      Error message: {error_message}
+
+      Please provide the corrected code:
+
+    code_translation: |
+      Translate the following {source_language} code to {target_language}:
+
+      Original code:
+      ```{source_language}
+      {source_code}
+      ```
+
+      Requirements:
+      - Maintain identical functionality
+      - Use target language best practices
+      - Include appropriate comments
+
+      Translated code:
+
+    function_generation: |
+      Implement a function according to the following specification:
+
+      Function name: {function_name}
+      Parameters: {parameters}
+      Return type: {return_type}
+      Description: {description}
+
+      Requirements:
+      {requirements}
+
+      Please provide the complete function implementation:
+
+    algorithm_implementation: |
+      Implement the following algorithm:
+
+      Algorithm name: {algorithm_name}
+      Problem description: {problem_description}
+      Input format: {input_format}
+      Output format: {output_format}
+      Constraints: {constraints}
+
+      Requirements:
+      - Time complexity: {time_complexity}
+      - Space complexity: {space_complexity}
+      - Include detailed comments
+
+      Please provide the algorithm implementation:
+
+# Model variants configuration
+model_variants:
+  qwen-coder-plus:
+    description: "Latest code-optimized model with enhanced code generation and understanding capabilities"
+    max_tokens: 2048
+    context_length: 8192
+    recommended_for: ["code_completion", "bug_fix", "algorithm_implementation"]
+    
+  qwen-coder:
+    description: "Specialized code generation model"
+    max_tokens: 1024
+    context_length: 4096
+    recommended_for: ["function_generation", "code_translation"]
+    
+  qwen-max:
+    description: "Most capable general-purpose model for complex tasks"
+    max_tokens: 4096
+    context_length: 32768
+    recommended_for: ["system_design", "full_stack", "security"]
+    
+  qwen-plus:
+    description: "Balanced performance and cost model"
+    max_tokens: 2048
+    context_length: 16384
+    recommended_for: ["documentation", "testing_strategy"]
+    
+  qwen-turbo:
+    description: "Fast and cost-effective model"
+    max_tokens: 1024
+    context_length: 8192
+    recommended_for: ["simple tasks", "batch processing"]
+
+# Performance optimization
+performance_config:
+  enable_caching: true
+  cache_ttl: 3600  # 1 hour
+  enable_batching: true
+  max_batch_size: 10
+  enable_streaming: false
+  request_timeout: 60
+  
+# Error handling
+error_handling:
+  max_retries: 3
+  retry_delay: 1
+  exponential_backoff: true
+  handle_rate_limits: true
+  fallback_model: "qwen-coder"  # Fallback if primary model fails
+
+# Monitoring and logging
+monitoring:
+  log_requests: true
+  log_responses: false  # Set to true for debugging
+  track_usage: true
+  track_performance: true
+
+# Security settings
+security:
+  validate_api_key: true
+  use_https: true
+  sanitize_inputs: true
+  mask_sensitive_data: true
+
+# Usage examples in comments
+usage_examples: |
+  # Basic usage
+  lm_eval --model dashscope \
+      --model_args model=qwen-coder-plus \
+      --tasks single_turn_scenarios_code_completion \
+      --limit 10
+
+  # With custom parameters
+  lm_eval --model dashscope \
+      --model_args model=qwen-max,temperature=0.1,max_tokens=4096 \
+      --tasks single_turn_scenarios_system_design \
+      --limit 5
+
+  # Using configuration file
+  lm_eval --model dashscope \
+      --model_args config_file=model_configs/dashscope.yaml \
+      --tasks single_turn_scenarios_suite \
+      --limit 50

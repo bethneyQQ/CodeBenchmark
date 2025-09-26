@@ -1,0 +1,52 @@
+# Universal Model Configuration for Single Turn Scenarios
+model_name: "universal"
+model_type: "universal"
+
+endpoint_config:
+  base_url: "auto"  # Auto-detect based on model
+  timeout: 60
+  rate_limit: 10
+  max_retries: 3
+
+generation_params:
+  temperature: 0.0
+  max_tokens: 1024
+  top_p: 0.95
+  stop_sequences: []
+
+batch_config:
+  batch_size: 4
+  max_batch_size: 16
+  parallel_requests: false  # Conservative default
+
+tokenizer_config:
+  encoding: "auto"  # Auto-detect
+  max_context: 8192  # Conservative default
+  context_window: 8192
+
+optimization:
+  use_caching: true
+  cache_ttl: 3600
+  enable_streaming: false
+  adaptive_batching: true
+
+scenario_specific:
+  default:
+    max_tokens: 512
+    temperature: 0.0
+  complex_scenarios:
+    max_tokens: 1024
+    temperature: 0.1
+
+features:
+  universal_compatibility: true
+  auto_detection: true
+  fallback_support: true
+  basic_functionality: true
+
+metadata:
+  version: "1.0"
+  description: "Universal configuration compatible with most model backends"
+  supported_languages: ["python", "javascript", "java", "cpp"]
+  best_for: ["general_purpose", "fallback", "testing"]
+  compatibility: "high"

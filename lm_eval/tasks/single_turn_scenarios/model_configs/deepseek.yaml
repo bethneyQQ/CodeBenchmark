@@ -1,0 +1,56 @@
+# DeepSeek Model Configuration for Single Turn Scenarios
+model_name: "deepseek-coder"
+model_type: "deepseek"
+
+endpoint_config:
+  base_url: "https://api.deepseek.com"
+  timeout: 45
+  rate_limit: 20
+  max_retries: 3
+
+generation_params:
+  temperature: 0.0
+  max_tokens: 1024
+  top_p: 0.95
+  frequency_penalty: 0.0
+  presence_penalty: 0.0
+
+batch_config:
+  batch_size: 8
+  max_batch_size: 32
+  parallel_requests: true
+
+tokenizer_config:
+  encoding: "deepseek"
+  max_context: 16384
+  context_window: 16384
+
+optimization:
+  use_caching: true
+  cache_ttl: 1800
+  cost_optimization: true
+  enable_streaming: false
+
+scenario_specific:
+  code_completion:
+    max_tokens: 256
+    temperature: 0.0
+  bug_fix:
+    max_tokens: 512
+    temperature: 0.1
+  algorithm_implementation:
+    max_tokens: 1024
+    temperature: 0.0
+
+features:
+  cost_effective: true
+  code_focused: true
+  multi_language_support: true
+  fast_inference: true
+
+metadata:
+  version: "1.0"
+  description: "Cost-effective configuration for DeepSeek with optimized performance"
+  supported_languages: ["python", "javascript", "java", "cpp", "go"]
+  best_for: ["code_completion", "bug_fix", "function_generation", "code_translation"]
+  cost_tier: "low"

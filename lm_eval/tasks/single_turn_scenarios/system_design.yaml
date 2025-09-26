@@ -1,0 +1,44 @@
+task: single_turn_scenarios_system_design
+dataset_kwargs:
+  metadata:
+    scenario: "system_design"
+custom_dataset: !function utils.load_dataset
+
+test_split: test
+output_type: generate_until
+process_docs: !function utils.process_docs
+doc_to_text: !function utils.doc_to_text
+doc_to_target: !function utils.doc_to_target
+
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.bleu_score
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.phase_coherence
+    aggregation: mean
+    higher_is_better: true
+  - metric: !function metrics.design_implementation_alignment
+    aggregation: mean
+    higher_is_better: true
+
+generation_kwargs:
+  temperature: 0.0
+  max_gen_toks: 1024
+  until: []
+  do_sample: false
+
+repeats: 1
+num_fewshot: 0
+
+tag:
+  - single_turn_scenarios
+  - system_design
+  - advanced_scenario
+
+metadata:
+  version: 1.0
+  scenario: "system_design"
+  description: "System architecture design tasks"

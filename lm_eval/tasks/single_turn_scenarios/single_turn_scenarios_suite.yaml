@@ -1,0 +1,60 @@
+group: single_turn_scenarios_suite
+group_alias: "Single Turn Scenarios Evaluation Suite"
+
+task:
+  # Basic Scenarios (from python_coding)
+  - single_turn_scenarios_code_completion
+  - single_turn_scenarios_bug_fix
+  - single_turn_scenarios_code_translation
+  - single_turn_scenarios_documentation
+  - single_turn_scenarios_function_generation
+  
+  # Advanced Scenarios (from multi_turn_generic)
+  - single_turn_scenarios_system_design
+  - single_turn_scenarios_algorithm_implementation
+  - single_turn_scenarios_api_design
+  - single_turn_scenarios_database_design
+  - single_turn_scenarios_performance_optimization
+  
+  # Comprehensive Scenarios (new)
+  - single_turn_scenarios_full_stack
+  - single_turn_scenarios_testing_strategy
+  - single_turn_scenarios_security
+
+aggregate_metric_list:
+  - metric: exact_match
+    aggregation: mean
+    weight_by_size: true
+  - metric: bleu_score
+    aggregation: mean
+    weight_by_size: true
+  - metric: codebleu_score
+    aggregation: mean
+    weight_by_size: true
+  - metric: syntax_validity
+    aggregation: mean
+    weight_by_size: true
+  - metric: pass_at_k
+    aggregation: mean
+    weight_by_size: true
+  - metric: runtime_correctness
+    aggregation: mean
+    weight_by_size: true
+
+tag:
+  - single_turn_scenarios
+  - comprehensive_evaluation
+  - multi_language
+  - multi_scenario
+
+metadata:
+  version: 1.0
+  description: "Comprehensive single-turn programming scenario evaluation suite integrating python_coding and multi_turn_generic strengths"
+  supported_languages: ["python", "javascript", "typescript", "java", "cpp", "go", "rust"]
+  supported_scenarios: [
+    "code_completion", "bug_fix", "code_translation", "documentation", "function_generation",
+    "system_design", "algorithm_implementation", "api_design", "database_design", "performance_optimization",
+    "full_stack", "testing_strategy", "security"
+  ]
+  difficulty_levels: ["simple", "intermediate", "complex"]
+  context_modes: ["no_context", "minimal_context", "full_context", "domain_context"]
